@@ -19,13 +19,13 @@ impl Component for Loans {
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
-        let items: Vec<VChild<Loan>> = self
+        let items: Vec<VChild<LoanRow>> = self
             .loans
             .iter()
             .enumerate()
             .map(|(ix, item)| {
                 html_nested! {
-                    <Loan loan={item.clone()} />
+                    <LoanRow loan={item.clone()} />
                 }
             }).collect();
 
@@ -43,25 +43,25 @@ pub struct Loan {
     pub name: String,
 }
 
+pub struct LoanRow;
+
 #[derive(Clone, PartialEq, Properties)]
 pub struct LoanProps {
     loan: Loan,
 }
 
-impl Component for Loan {
+impl Component for LoanRow {
     type Message = ();
     type Properties = LoanProps;
 
     fn create(_ctx: &Context<Self>) -> Self {
-        Self {
-            name: "".to_owned()
-        }
+        Self
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
         html! {
             <div>
-                { self.name.clone() }
+                { "Loan: " }{ ctx.props().loan.name.clone() }
             </div>
         }
     }
