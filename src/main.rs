@@ -74,5 +74,7 @@ impl Component for MyComponentWithProps {
 }
 
 fn main() {
-    yew::start_app::<Model>();
+    let document = gloo_utils::document();
+    let mount_point = document.query_selector("div.mountpoint").unwrap().unwrap();
+    yew::start_app_in_element::<Model>(mount_point);
 }
