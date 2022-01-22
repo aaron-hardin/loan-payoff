@@ -1,3 +1,6 @@
+mod loans;
+
+use loans::Loans;
 use yew::prelude::*;
 
 enum Msg {
@@ -34,6 +37,7 @@ impl Component for Model {
         let link = ctx.link();
         html! {
             <div>
+                <Loans />
                 <MyComponentWithProps prop1="lorem" prop2="ipsum" />
                 <button onclick={link.callback(|_| Msg::AddOne)}>{ "+1" }</button>
                 <p>{ self.value }</p>
