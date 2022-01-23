@@ -1,7 +1,7 @@
-mod loans;
-
-use loans::Loans;
+use components::Loans;
 use yew::prelude::*;
+
+mod components;
 
 enum Msg {
     AddOne,
