@@ -189,6 +189,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "loan-payoff-web-ui"
+version = "0.1.0"
+dependencies = [
+ "gloo-utils",
+ "loan-payoff",
+ "yew",
+]
+
+[[package]]
 name = "log"
 version = "0.4.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"

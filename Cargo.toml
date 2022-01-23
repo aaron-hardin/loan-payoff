@@ -1,0 +1,2 @@
+[workspace]
+members = ["loan-payoff", "loan-payoff-web-ui"]
