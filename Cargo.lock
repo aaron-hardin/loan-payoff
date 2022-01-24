@@ -189,6 +189,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "loan-payoff-cli"
+version = "0.1.0"
+dependencies = [
+ "loan-payoff",
+]
+
+[[package]]
 name = "loan-payoff-web-ui"
 version = "0.1.0"
 dependencies = [
