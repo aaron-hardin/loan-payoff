@@ -36,31 +36,44 @@ fn main() {
     }
 
     let mut count = 0;
-    let extra_amount = 0.0;
-    payment_amounts[0] = round_to_currency(payment_amounts[0] + extra_amount);
-    payment_amounts[1] = round_to_currency(payment_amounts[1] + extra_amount);
-    while (loans[0].present_value > 0.0 && !approx_equal(loans[0].present_value, 0.0, default_rounding_places))
-            || (loans[1].present_value > 0.0 && !approx_equal(loans[1].present_value, 0.0, default_rounding_places)) {
+    let mut extra_amount = 100.0;
+    let original_extra_amount = extra_amount;
+    while loans.iter().any(|loan| loan.present_value > 0.0 && !approx_equal(loan.present_value, 0.0, default_rounding_places)) {
         count += 1;
 
-        if loans[0].present_value > 0.0 && !approx_equal(loans[0].present_value, 0.0, default_rounding_places) {
-            let payment_amount_this_period = pay_loan(&mut loans[0], payment_amounts[0]);
-            println!("paying {} .. count={}", payment_amount_this_period, count);
-            actual_costs[0] = round_to_currency(actual_costs[0] + payment_amount_this_period);
-        }
+        let mut extra_amount_this_period = extra_amount;
+        for ix in 0..loans.len() {
+            if loans[ix].present_value > 0.0 && !approx_equal(loans[ix].present_value, 0.0, default_rounding_places) {
+                let amount_to_pay = payment_amounts[ix] + extra_amount_this_period;
+                let amount_paid_this_period = pay_loan(&mut loans[ix], amount_to_pay);
+                extra_amount_this_period = amount_paid_this_period - amount_to_pay;
+                println!("paying {} .. count={}", amount_paid_this_period, count);
+                actual_costs[ix] = round_to_currency(actual_costs[ix] + amount_paid_this_period);
 
-        if loans[1].present_value > 0.0 && !approx_equal(loans[1].present_value, 0.0, default_rounding_places) {
-            let payment_amount_this_period = pay_loan(&mut loans[1], payment_amounts[1]);
-            println!("paying {} .. count={}", payment_amount_this_period, count);
-            actual_costs[1] = round_to_currency(actual_costs[1] + payment_amount_this_period);
+                // If the loan goes to 0 after paying, add the monthly payment to extra_amount (after paying all loans)
+                if approx_equal(loans[ix].present_value, 0.0, default_rounding_places) {
+                    // Note: we can update extra_amount directly because it is not used until next period
+                    extra_amount = round_to_currency(extra_amount + payment_amounts[ix]);
+                }
+            }
         }
     }
 
+    let mut expected_costs_total = 0.0;
+    let mut actual_costs_total = 0.0;
+    let mut savings_total = 0.0;
     for i in 0..loans.len() {
-        println!("EXPECTED=${}", expected_costs[i]);
-        println!("ACTUAL=${}", actual_costs[i]);
-        println!("By paying an extra ${}, you saved ${}", extra_amount, round_to_currency(expected_costs[i]-actual_costs[i]));
+        expected_costs_total += expected_costs[i];
+        actual_costs_total += actual_costs[i];
+        savings_total += expected_costs[i]-actual_costs[i];
+        println!("{} - EXPECTED=${}", loans[i].name, expected_costs[i]);
+        println!("{} - ACTUAL=${}", loans[i].name, actual_costs[i]);
+        println!("{} - By paying an extra ${}, you saved ${}", loans[i].name, original_extra_amount, round_to_currency(expected_costs[i]-actual_costs[i]));
     }
+
+    println!("EXPECTED=${}", round_to_currency(expected_costs_total));
+    println!("ACTUAL=${}", round_to_currency(actual_costs_total));
+    println!("By paying an extra ${}, you saved ${}", original_extra_amount, round_to_currency(savings_total));
 }
 
 // Returns the amount paid
