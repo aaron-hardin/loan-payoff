@@ -15,14 +15,14 @@ impl Component for Loans {
             loans: vec![
                 Loan {
                     name: "eek".to_owned(),
-                    present_value: 1000.00,
+                    initial_value: 1000.00,
                     rate: 1.23,
                     number_of_payments: 23,
                     payment_amount: 234.43
                 },
                 Loan {
                     name: "num2".to_owned(),
-                    present_value: 10000.00,
+                    initial_value: 10000.00,
                     rate: 0.00625,
                     number_of_payments: 48,
                     payment_amount: 234.43
@@ -73,7 +73,7 @@ impl Component for LoanRow {
             <div class="row">
                 <div class="col l2">{ format!("Loan: {}", calculated_payment_amount) }</div>
                 <div class="col l2">{ ctx.props().loan.name.clone() }</div>
-                <div class="col l2">{ ctx.props().loan.present_value.clone() }</div>
+                <div class="col l2">{ ctx.props().loan.initial_value.clone() }</div>
                 <div class="col l2">{ ctx.props().loan.rate.clone() }</div>
                 <div class="col l2">{ ctx.props().loan.number_of_payments.clone() }</div>
                 <div class="col l2">{ ctx.props().loan.payment_amount.clone() }</div>
