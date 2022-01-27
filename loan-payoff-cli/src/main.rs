@@ -1,59 +1,138 @@
 use loan_payoff::{Loan};
-use std::cmp;
+//use std::cmp;
 
-const default_rounding_places: u8 = 4;
+const DEFAULT_ROUNDING_PLACES: u8 = 4;
 
 fn main() {
-    let mut loan1 = Loan {
-        name: "num1".to_owned(),
-        present_value: 12000.00,
-        rate: 0.006,
-        number_of_payments: 48,
-        payment_amount: 288.47
-    };
-    let mut loan2 = Loan {
-        name: "num2".to_owned(),
-        present_value: 10000.00,
-        rate: 0.00625,
-        number_of_payments: 48,
-        payment_amount: 241.79
-    };
+    let loan1 = Loan::new(
+        "num1".to_owned(),
+        12000.00,
+        0.006,
+        48,
+        288.47
+    );
+    let loan2 = Loan::new(
+        "num2".to_owned(),
+        11000.00,
+        0.00625,
+        48,
+        265.97
+    );
+    let loan3 = Loan::new(
+        /*name:*/ "num3".to_owned(),
+        /*present_value:*/ 10000.00,
+        /*rate:*/ 0.014,
+        /*number_of_payments:*/ 48,
+        /*payment_amount:*/ 287.52
+    );
 
-    let mut loans = vec![loan1, loan2];
+    // let mut ordering1 = vec!(&loan1, &loan2);
+    // pay_loans(ordering1);
+    // // let temp = ordering1[0];
+    // // ordering1[0] = ordering1[1];
+    // // ordering1[1] = temp;
+    // ordering1.swap(0,1);
+    // pay_loans(ordering1);
 
-    let mut payment_amounts = Vec::new();
-    let mut actual_costs = Vec::new();
-    let mut expected_costs = Vec::new();
-    for i in 0..loans.len() {
+    //pay_loans(vec!(&loan1, &loan2));
+    //std::mem::swap(&mut loan1, &mut loan2);
+    //pay_loans(vec!(&loan1, &loan2));
+
+    // let mut ordering = [0, 1];
+    // pay_loans(vec!(&loan1, &loan2), &ordering);
+    // ordering.swap(0, 1);
+    // pay_loans(vec!(&loan1, &loan2), &ordering);
+
+    pay_loans_all_orderings(vec!(&loan1, &loan2, &loan3));
+
+    // pay_loans(vec!(&loan1, &loan2));
+    // pay_loans(vec!(&loan2, &loan1));
+
+    // pay_loans(vec![&loan1, &loan2, &loan3]);
+    // pay_loans(vec![&loan1, &loan3, &loan2]);
+    // pay_loans(vec![&loan3, &loan1, &loan2]);
+    // pay_loans(vec![&loan3, &loan2, &loan1]);
+    // pay_loans(vec![&loan2, &loan3, &loan1]);
+    // pay_loans(vec![&loan2, &loan1, &loan3]);
+}
+
+fn pay_loans_all_orderings(loans: Vec<&Loan>) {
+    let mut ordering = vec![0; loans.len()];
+    for i in 0..ordering.len() { ordering[i] = i }
+
+    // initial ordering
+    pay_loans(&loans, &ordering);
+
+    let n = loans.len();
+    let mut p = vec![0; n + 1];
+    for i in 0..p.len() { p[i] = i }
+    let mut i = 1;
+    while i < n {
+        p[i] -= 1;
+        let j = if i % 2 == 0 { 0 } else { p[i] };
+        ordering.swap(j, i);
+
+        let (is_debt_snowball, actual_costs_total, savings_total) = pay_loans(&loans, &ordering);
+
+        i = 1;
+        while p[i] == 0 {
+            p[i] = i;
+            i += 1;
+        } // end while (p[i] is equal to 0)
+    } // end while (i < N)
+
+    // TODO: print best ordering
+    //println!("{}", ordering.iter().map(|&i| loans[i].name.clone()).collect::<Vec<String>>().join(" -> "));
+}
+
+fn pay_loans(loans: &Vec<&Loan>, ordering: &[usize]) -> (bool, f64, f64) {
+    let mut remaining_amounts = vec![0.0; loans.len()];
+    let mut actual_costs = vec![0.0; loans.len()];
+    let mut expected_costs = vec![0.0; loans.len()];
+
+    let mut is_debt_snowball = true;
+    let mut max_cost = 0.0;
+
+    for &i in ordering.iter() {
         let payment_amount = round_to_currency(loans[i].calculate_payment_amount());
-        payment_amounts.push(payment_amount);
-        if !approx_equal(payment_amount, loans[i].payment_amount, default_rounding_places) {
-            println!("warning: calculated loan payment amount {} is not the same as given amount {}", payment_amount, loans[i].payment_amount);
+        if !approx_equal(payment_amount, loans[i].payment_amount, DEFAULT_ROUNDING_PLACES) {
+            panic!("warning for loan '{}': calculated loan payment amount {} is not the same as given amount {}", loans[i].name, payment_amount, loans[i].payment_amount);
         }
 
-        actual_costs.push(0.0);
-        expected_costs.push(round_to_currency(payment_amounts[i] * loans[i].number_of_payments as f64));
+        if max_cost > loans[i].initial_value {
+            is_debt_snowball = false;
+        } else {
+            max_cost = loans[i].initial_value;
+        }
+
+        remaining_amounts[i] = loans[i].initial_value;
+        expected_costs[i] = round_to_currency(loans[i].payment_amount * loans[i].number_of_payments as f64);
     }
 
     let mut count = 0;
     let mut extra_amount = 100.0;
     let original_extra_amount = extra_amount;
-    while loans.iter().any(|loan| loan.present_value > 0.0 && !approx_equal(loan.present_value, 0.0, default_rounding_places)) {
+    while ordering.iter().any(|&i| remaining_amounts[i] > 0.0 && !approx_equal(remaining_amounts[i], 0.0, DEFAULT_ROUNDING_PLACES)) {
         count += 1;
 
         let mut extra_amount_this_period = extra_amount;
-        for ix in 0..loans.len() {
-            if loans[ix].present_value > 0.0 && !approx_equal(loans[ix].present_value, 0.0, default_rounding_places) {
-                let amount_to_pay = payment_amounts[ix] + extra_amount_this_period;
-                let amount_paid_this_period = pay_loan(&mut loans[ix], amount_to_pay);
+        for &ix in ordering.iter() {
+            if remaining_amounts[ix] > 0.0 && !approx_equal(remaining_amounts[ix], 0.0, DEFAULT_ROUNDING_PLACES) {
+                let amount_to_pay = loans[ix].payment_amount + extra_amount_this_period;
+
+                //println!("BEFORE: {}, remaining={}", loans[ix], remaining_amounts[ix]);
+                let (amount_paid_this_period, remaining_amount) = loans[ix].pay_loan(remaining_amounts[ix], amount_to_pay);
+                //println!("AFTER: {}, remaining={}", loans[ix], remaining_amount);
+
+                remaining_amounts[ix] = remaining_amount;
                 extra_amount_this_period = amount_paid_this_period - amount_to_pay;
-                println!("paying {} .. count={}", amount_paid_this_period, count);
+                //println!("paying {} .. count={}", amount_paid_this_period, count);
                 actual_costs[ix] = round_to_currency(actual_costs[ix] + amount_paid_this_period);
 
                 // If the loan goes to 0 after paying, add the monthly payment to extra_amount (after paying all loans)
-                if approx_equal(loans[ix].present_value, 0.0, default_rounding_places) {
+                if approx_equal(remaining_amounts[ix], 0.0, DEFAULT_ROUNDING_PLACES) {
                     // Note: we can update extra_amount directly because it is not used until next period
-                    extra_amount = round_to_currency(extra_amount + payment_amounts[ix]);
+                    extra_amount = round_to_currency(extra_amount + loans[ix].payment_amount);
                 }
             }
         }
@@ -62,7 +141,7 @@ fn main() {
     let mut expected_costs_total = 0.0;
     let mut actual_costs_total = 0.0;
     let mut savings_total = 0.0;
-    for i in 0..loans.len() {
+    for &i in ordering.iter() {
         expected_costs_total += expected_costs[i];
         actual_costs_total += actual_costs[i];
         savings_total += expected_costs[i]-actual_costs[i];
@@ -70,41 +149,16 @@ fn main() {
         println!("{} - ACTUAL=${}", loans[i].name, actual_costs[i]);
         println!("{} - By paying an extra ${}, you saved ${}", loans[i].name, original_extra_amount, round_to_currency(expected_costs[i]-actual_costs[i]));
     }
+    println!("{}", ordering.iter().map(|&i| loans[i].name.clone()).collect::<Vec<String>>().join(" -> "));
 
+    actual_costs_total = round_to_currency(actual_costs_total);
+    savings_total = round_to_currency(savings_total);
     println!("EXPECTED=${}", round_to_currency(expected_costs_total));
-    println!("ACTUAL=${}", round_to_currency(actual_costs_total));
-    println!("By paying an extra ${}, you saved ${}", original_extra_amount, round_to_currency(savings_total));
-}
+    println!("ACTUAL=${}", actual_costs_total);
+    println!("By paying an extra ${}, you saved ${}", original_extra_amount, savings_total);
+    println!("Total periods={}", count);
 
-// Returns the amount paid
-fn pay_loan(loan: &mut Loan, payment_amount: f64) -> f64 {
-    //let mut payment_amount = round_to_currency(loan.calculate_payment_amount());
-    //let calculated_payment_amount = payment_amount;
-    if approx_equal(payment_amount, 0.0, default_rounding_places) {
-        println!("ERR: paying {}", payment_amount);
-        return 0.0;
-    }
-
-    let interest = round_to_currency(loan.present_value * loan.rate);
-    println!("interest={}", interest);
-    loan.present_value += interest;
-    // if (payment_amount+5.0) <= loan.present_value {
-    //     payment_amount = round_to_currency(payment_amount + 5.0);
-    // }
-    let mut payment_amount_this_period = payment_amount;
-    if payment_amount_this_period > loan.present_value {
-        payment_amount_this_period = round_to_currency(loan.present_value);
-    }
-    loan.present_value = round_to_currency(loan.present_value);
-    println!("BEFORE: {}", loan);
-    //println!("paying {} .. count={}, amount_due={}", payment_amount, count, calculated_payment_amount);
-    loan.present_value -= payment_amount_this_period;
-    loan.present_value = round_to_currency(loan.present_value);
-    loan.number_of_payments -= 1;
-
-    println!("AFTER: {}", loan);
-
-    payment_amount_this_period
+    (is_debt_snowball, actual_costs_total, savings_total)
 }
 
 fn approx_equal (a: f64, b: f64, decimal_places: u8) -> bool {
