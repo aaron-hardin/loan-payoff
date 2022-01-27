@@ -1,5 +1,4 @@
 use loan_payoff::{Loan};
-//use std::cmp;
 
 const DEFAULT_ROUNDING_PLACES: u8 = 4;
 
@@ -26,34 +25,7 @@ fn main() {
         /*payment_amount:*/ 287.52
     );
 
-    // let mut ordering1 = vec!(&loan1, &loan2);
-    // pay_loans(ordering1);
-    // // let temp = ordering1[0];
-    // // ordering1[0] = ordering1[1];
-    // // ordering1[1] = temp;
-    // ordering1.swap(0,1);
-    // pay_loans(ordering1);
-
-    //pay_loans(vec!(&loan1, &loan2));
-    //std::mem::swap(&mut loan1, &mut loan2);
-    //pay_loans(vec!(&loan1, &loan2));
-
-    // let mut ordering = [0, 1];
-    // pay_loans(vec!(&loan1, &loan2), &ordering);
-    // ordering.swap(0, 1);
-    // pay_loans(vec!(&loan1, &loan2), &ordering);
-
     pay_loans_all_orderings(vec!(&loan1, &loan2, &loan3));
-
-    // pay_loans(vec!(&loan1, &loan2));
-    // pay_loans(vec!(&loan2, &loan1));
-
-    // pay_loans(vec![&loan1, &loan2, &loan3]);
-    // pay_loans(vec![&loan1, &loan3, &loan2]);
-    // pay_loans(vec![&loan3, &loan1, &loan2]);
-    // pay_loans(vec![&loan3, &loan2, &loan1]);
-    // pay_loans(vec![&loan2, &loan3, &loan1]);
-    // pay_loans(vec![&loan2, &loan1, &loan3]);
 }
 
 fn pay_loans_all_orderings(loans: Vec<&Loan>) {
