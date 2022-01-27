@@ -29,11 +29,12 @@ fn main() {
 }
 
 fn pay_loans_all_orderings(loans: Vec<&Loan>) {
+    // https://www.quickperm.org/
     let mut ordering = vec![0; loans.len()];
     for i in 0..ordering.len() { ordering[i] = i }
 
     // initial ordering
-    pay_loans(&loans, &ordering);
+    let (is_debt_snowball, actual_costs_total, savings_total) = pay_loans(&loans, &ordering);
 
     let n = loans.len();
     let mut p = vec![0; n + 1];
