@@ -25,16 +25,29 @@ fn main() {
         /*payment_amount:*/ 287.52
     );
 
-    pay_loans_all_orderings(vec!(&loan1, &loan2, &loan3));
+    let extra_amount = 100.0;
+    let loans = vec!(&loan1, &loan2, &loan3);
+    let (best_ordering, best_savings) = pay_loans_all_orderings(&loans, extra_amount);
+
+    println!(
+        "Best ordering = {}, with savings ${}",
+        best_ordering.iter().map(|&i| loans[i].name.clone()).collect::<Vec<String>>().join(" -> "),
+        best_savings
+    );
 }
 
-fn pay_loans_all_orderings(loans: Vec<&Loan>) {
+fn pay_loans_all_orderings(loans: &Vec<&Loan>, extra_amount: f64) -> (Vec<usize>, f64) {
     // https://www.quickperm.org/
     let mut ordering = vec![0; loans.len()];
     for i in 0..ordering.len() { ordering[i] = i }
 
     // initial ordering
-    let (is_debt_snowball, actual_costs_total, savings_total) = pay_loans(&loans, &ordering);
+    let mut best_savings = -1.0;
+    let mut best_ordering = ordering.clone();
+    let (_is_debt_snowball, _actual_costs_total, savings_total) = pay_loans(&loans, extra_amount, &ordering);
+    if savings_total > best_savings {
+        best_savings = savings_total;
+    }
 
     let n = loans.len();
     let mut p = vec![0; n + 1];
@@ -45,7 +58,11 @@ fn pay_loans_all_orderings(loans: Vec<&Loan>) {
         let j = if i % 2 == 0 { 0 } else { p[i] };
         ordering.swap(j, i);
 
-        let (is_debt_snowball, actual_costs_total, savings_total) = pay_loans(&loans, &ordering);
+        let (_is_debt_snowball, _actual_costs_total, savings_total) = pay_loans(&loans, extra_amount, &ordering);
+        if savings_total > best_savings {
+            best_savings = savings_total;
+            best_ordering = ordering.clone();
+        }
 
         i = 1;
         while p[i] == 0 {
@@ -54,14 +71,14 @@ fn pay_loans_all_orderings(loans: Vec<&Loan>) {
         } // end while (p[i] is equal to 0)
     } // end while (i < N)
 
-    // TODO: print best ordering
-    //println!("{}", ordering.iter().map(|&i| loans[i].name.clone()).collect::<Vec<String>>().join(" -> "));
+    (best_ordering, best_savings)
 }
 
-fn pay_loans(loans: &Vec<&Loan>, ordering: &[usize]) -> (bool, f64, f64) {
+fn pay_loans(loans: &Vec<&Loan>, extra_amount: f64, ordering: &[usize]) -> (bool, f64, f64) {
     let mut remaining_amounts = vec![0.0; loans.len()];
     let mut actual_costs = vec![0.0; loans.len()];
     let mut expected_costs = vec![0.0; loans.len()];
+    let mut extra_amount = extra_amount;
 
     let mut is_debt_snowball = true;
     let mut max_cost = 0.0;
@@ -83,7 +100,6 @@ fn pay_loans(loans: &Vec<&Loan>, ordering: &[usize]) -> (bool, f64, f64) {
     }
 
     let mut count = 0;
-    let mut extra_amount = 100.0;
     let original_extra_amount = extra_amount;
     while ordering.iter().any(|&i| remaining_amounts[i] > 0.0 && !approx_equal(remaining_amounts[i], 0.0, DEFAULT_ROUNDING_PLACES)) {
         count += 1;
@@ -118,9 +134,9 @@ fn pay_loans(loans: &Vec<&Loan>, ordering: &[usize]) -> (bool, f64, f64) {
         expected_costs_total += expected_costs[i];
         actual_costs_total += actual_costs[i];
         savings_total += expected_costs[i]-actual_costs[i];
-        println!("{} - EXPECTED=${}", loans[i].name, expected_costs[i]);
-        println!("{} - ACTUAL=${}", loans[i].name, actual_costs[i]);
-        println!("{} - By paying an extra ${}, you saved ${}", loans[i].name, original_extra_amount, round_to_currency(expected_costs[i]-actual_costs[i]));
+        // println!("{} - EXPECTED=${}", loans[i].name, expected_costs[i]);
+        // println!("{} - ACTUAL=${}", loans[i].name, actual_costs[i]);
+        // println!("{} - By paying an extra ${}, you saved ${}", loans[i].name, original_extra_amount, round_to_currency(expected_costs[i]-actual_costs[i]));
     }
     println!("{}", ordering.iter().map(|&i| loans[i].name.clone()).collect::<Vec<String>>().join(" -> "));
 
