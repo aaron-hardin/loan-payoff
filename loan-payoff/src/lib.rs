@@ -193,7 +193,7 @@ impl fmt::Display for Loan {
     }
 }
 
-pub fn approx_equal (a: f64, b: f64, decimal_places: u8) -> bool {
+pub fn approx_equal(a: f64, b: f64, decimal_places: u8) -> bool {
     let p = 10.0f64.powi(-(decimal_places as i32));
     (a-b).abs() < p
 }

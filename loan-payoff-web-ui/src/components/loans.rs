@@ -1,4 +1,4 @@
-use loan_payoff::{Loan, pay_loans_all_orderings};
+use loan_payoff::{Loan, pay_loans_all_orderings, round_to_currency};
 use yew::prelude::*;
 use yew::virtual_dom::VChild;
 
@@ -37,6 +37,7 @@ impl Component for Loans {
                     payment_amount: 241.79,
                 },
             ],
+            // TODO: this should be set via ui as well
             extra_amount: 100.0,
             optimal_payoff_display: "".to_owned()
         }
@@ -105,7 +106,8 @@ impl Component for LoanRow {
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
-        let calculated_payment_amount = ctx.props().loan.calculate_payment_amount();
+        let mut calculated_payment_amount = ctx.props().loan.calculate_payment_amount();
+        calculated_payment_amount = round_to_currency(calculated_payment_amount);
 
         html! {
             <div class="row">
