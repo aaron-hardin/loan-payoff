@@ -1,13 +1,20 @@
-use loan_payoff::{Loan};
+use loan_payoff::{Loan, pay_loans_all_orderings};
 use yew::prelude::*;
 use yew::virtual_dom::VChild;
 
+pub enum LoansMsg {
+    AddLoan,
+    Calculate,
+}
+
 pub struct Loans {
     loans: Vec<Loan>,
+    extra_amount: f64,
+    optimal_payoff_display: String,
 }
 
 impl Component for Loans {
-    type Message = ();
+    type Message = LoansMsg;
     type Properties = ();
 
     fn create(_ctx: &Context<Self>) -> Self {
@@ -18,16 +25,46 @@ impl Component for Loans {
                     initial_value: 1000.00,
                     rate: 1.23,
                     number_of_payments: 23,
-                    payment_amount: 234.43
+                    // TODO: test with bad values: payment_amount: 234.43
+                    payment_amount: 1230.0,
                 },
                 Loan {
                     name: "num2".to_owned(),
                     initial_value: 10000.00,
                     rate: 0.00625,
                     number_of_payments: 48,
-                    payment_amount: 234.43
+                    // TODO: test with bad values: payment_amount: 234.43
+                    payment_amount: 241.79,
                 },
             ],
+            extra_amount: 100.0,
+            optimal_payoff_display: "".to_owned()
+        }
+    }
+
+    fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
+        match msg {
+            LoansMsg::Calculate => {
+                let mut loans = Vec::new();
+                for loan in self.loans.iter() {
+                    loans.push(loan);
+                }
+                let optimal_payoff = pay_loans_all_orderings(&loans, self.extra_amount);
+
+                let stra = format!(
+                    "Best ordering = {}, with savings ${}",
+                    optimal_payoff.ordering.iter().map(|&i| loans[i].name.clone()).collect::<Vec<String>>().join(" -> "),
+                    optimal_payoff.savings
+                );
+                self.optimal_payoff_display = stra;
+
+                // the value has changed so we need to
+                // re-render for it to appear on the page
+                true
+            },
+            LoansMsg::AddLoan => {
+                true
+            }
         }
     }
 
@@ -35,8 +72,7 @@ impl Component for Loans {
         let items: Vec<VChild<LoanRow>> = self
             .loans
             .iter()
-            .enumerate()
-            .map(|(ix, item)| {
+            .map(|item| {
                 html_nested! {
                     <LoanRow loan={item.clone()} />
                 }
@@ -46,6 +82,8 @@ impl Component for Loans {
             <div>
                 { "loans:" }
                 { items }
+                <button onclick={ctx.link().callback(|_| LoansMsg::Calculate)}>{ "Calculate" }</button>
+                { self.optimal_payoff_display.clone() }
             </div>
         }
     }

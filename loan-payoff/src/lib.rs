@@ -10,6 +10,11 @@ pub struct Loan {
     //pub present_value: f64,
 }
 
+pub struct OptimalPayoff {
+    pub ordering: Vec<usize>,
+    pub savings: f64,
+}
+
 const DEFAULT_ROUNDING_PLACES: u8 = 4;
 
 impl Loan {
@@ -65,7 +70,7 @@ impl Loan {
     }
 }
 
-pub fn pay_loans_all_orderings(loans: &Vec<&Loan>, extra_amount: f64) -> (Vec<usize>, f64) {
+pub fn pay_loans_all_orderings(loans: &Vec<&Loan>, extra_amount: f64) -> OptimalPayoff {
     // https://www.quickperm.org/
     let mut ordering = vec![0; loans.len()];
     for i in 0..ordering.len() { ordering[i] = i }
@@ -100,7 +105,10 @@ pub fn pay_loans_all_orderings(loans: &Vec<&Loan>, extra_amount: f64) -> (Vec<us
         } // end while (p[i] is equal to 0)
     } // end while (i < N)
 
-    (best_ordering, best_savings)
+    OptimalPayoff {
+        ordering: best_ordering,
+        savings: best_savings,
+    }
 }
 
 pub fn pay_loans(loans: &Vec<&Loan>, extra_amount: f64, ordering: &[usize]) -> (bool, f64, f64) {
