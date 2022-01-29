@@ -25,11 +25,11 @@ fn main() {
 
     let extra_amount = 100.0;
     let loans = vec!(&loan1, &loan2, &loan3);
-    let (best_ordering, best_savings) = pay_loans_all_orderings(&loans, extra_amount);
+    let optimal_payoff = pay_loans_all_orderings(&loans, extra_amount);
 
     println!(
         "Best ordering = {}, with savings ${}",
-        best_ordering.iter().map(|&i| loans[i].name.clone()).collect::<Vec<String>>().join(" -> "),
-        best_savings
+        optimal_payoff.ordering.iter().map(|&i| loans[i].name.clone()).collect::<Vec<String>>().join(" -> "),
+        optimal_payoff.savings
     );
 }
