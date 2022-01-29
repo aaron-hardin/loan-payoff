@@ -17,7 +17,7 @@ fn main() {
     );
     let loan3 = Loan::new(
         /*name:*/ "num3".to_owned(),
-        /*present_value:*/ 10000.00,
+        /*initial_value:*/ 10000.00,
         /*rate:*/ 0.014,
         /*number_of_payments:*/ 48,
         /*payment_amount:*/ 287.52

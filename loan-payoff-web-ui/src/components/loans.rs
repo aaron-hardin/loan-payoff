@@ -23,10 +23,10 @@ impl Component for Loans {
                 Loan {
                     name: "eek".to_owned(),
                     initial_value: 1000.00,
-                    rate: 1.23,
+                    rate: 0.023,
                     number_of_payments: 23,
-                    // TODO: test with bad values: payment_amount: 234.43
-                    payment_amount: 1230.0,
+                    // TODO: test with bad values
+                    payment_amount: 56.47,
                 },
                 Loan {
                     name: "num2".to_owned(),
