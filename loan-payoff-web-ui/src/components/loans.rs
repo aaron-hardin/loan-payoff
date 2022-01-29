@@ -1,4 +1,5 @@
-use loan_payoff::{Loan, pay_loans_all_orderings, round_to_currency};
+use crate::components::LoanRow;
+use loan_payoff::{Loan, pay_loans_all_orderings};
 use web_sys::{HtmlInputElement, InputEvent};
 use yew::prelude::*;
 use yew::virtual_dom::VChild;
@@ -123,38 +124,6 @@ impl Component for Loans {
                         { self.optimal_payoff_display.clone() }
                     </div>
                 }
-            </div>
-        }
-    }
-}
-
-pub struct LoanRow;
-
-#[derive(Clone, PartialEq, Properties)]
-pub struct LoanProps {
-    loan: Loan,
-}
-
-impl Component for LoanRow {
-    type Message = ();
-    type Properties = LoanProps;
-
-    fn create(_ctx: &Context<Self>) -> Self {
-        Self
-    }
-
-    fn view(&self, ctx: &Context<Self>) -> Html {
-        let mut calculated_payment_amount = ctx.props().loan.calculate_payment_amount();
-        calculated_payment_amount = round_to_currency(calculated_payment_amount);
-
-        html! {
-            <div class="row">
-                <div class="col l2">{ format!("Loan: {}", calculated_payment_amount) }</div>
-                <div class="col l2">{ ctx.props().loan.name.clone() }</div>
-                <div class="col l2">{ ctx.props().loan.initial_value.clone() }</div>
-                <div class="col l2">{ ctx.props().loan.rate.clone() }</div>
-                <div class="col l2">{ ctx.props().loan.number_of_payments.clone() }</div>
-                <div class="col l2">{ ctx.props().loan.payment_amount.clone() }</div>
             </div>
         }
     }
