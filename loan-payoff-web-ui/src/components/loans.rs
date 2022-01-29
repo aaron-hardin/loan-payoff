@@ -1,10 +1,12 @@
 use loan_payoff::{Loan, pay_loans_all_orderings, round_to_currency};
+use web_sys::{HtmlInputElement, InputEvent};
 use yew::prelude::*;
 use yew::virtual_dom::VChild;
 
 pub enum LoansMsg {
     AddLoan,
     Calculate,
+    UpdateExtraAmount(String),
 }
 
 pub struct Loans {
@@ -74,11 +76,17 @@ impl Component for Loans {
                 };
                 self.loans.push(loan3);
                 true
-            }
+            },
+            LoansMsg::UpdateExtraAmount(content) => {
+                // TODO: if empty this throws, need to allow empty but disallow non-numerical
+                self.extra_amount = content.parse::<f64>().unwrap();
+                true
+            },
         }
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
+        let link = ctx.link();
         let items: Vec<VChild<LoanRow>> = self
             .loans
             .iter()
@@ -90,12 +98,24 @@ impl Component for Loans {
 
         html! {
             <div>
+                <div class="input-field">
+                    <input
+                        type="text"
+                        id="extra_payment"
+                        oninput={link.callback(|event: InputEvent| {
+                            let input: HtmlInputElement = event.target_unchecked_into();
+                            LoansMsg::UpdateExtraAmount(input.value())
+                        })}
+                        value={self.extra_amount.clone().to_string()}
+                    />
+                    <label for="extra_payment" class="active">{ "Extra Payment" }</label>
+                </div>
                 { "loans:" }
                 { items }
-                <button onclick={ctx.link().callback(|_| LoansMsg::Calculate)} class="btn space-right">
+                <button onclick={link.callback(|_| LoansMsg::Calculate)} class="btn space-right">
                     { "Calculate" }
                 </button>
-                <button onclick={ctx.link().callback(|_| LoansMsg::AddLoan)} class="btn">
+                <button onclick={link.callback(|_| LoansMsg::AddLoan)} class="btn">
                     { "Add Loan" }
                 </button>
                 if !self.optimal_payoff_display.is_empty() {
