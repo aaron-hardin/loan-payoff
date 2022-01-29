@@ -1,3 +1,4 @@
+use log;
 use std::fmt;
 
 #[derive(Clone, PartialEq)]
@@ -183,6 +184,8 @@ pub fn pay_loans(loans: &Vec<&Loan>, extra_amount: f64, ordering: &[usize]) -> (
     println!("ACTUAL=${}", actual_costs_total);
     println!("By paying an extra ${}, you saved ${}", original_extra_amount, savings_total);
     println!("Total periods={}", count);
+
+    log::info!("Pay loans with ordering {:?}, total amount {}, savings {}", ordering, actual_costs_total, savings_total);
 
     (is_debt_snowball, actual_costs_total, savings_total)
 }
