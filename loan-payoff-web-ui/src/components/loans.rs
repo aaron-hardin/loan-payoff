@@ -64,6 +64,14 @@ impl Component for Loans {
                 true
             },
             LoansMsg::AddLoan => {
+                let loan3 = Loan {
+                    name: "num3".to_owned(),
+                    initial_value: 10000.00,
+                    rate: 0.014,
+                    number_of_payments: 48,
+                    payment_amount: 287.52
+                };
+                self.loans.push(loan3);
                 true
             }
         }
@@ -83,7 +91,12 @@ impl Component for Loans {
             <div>
                 { "loans:" }
                 { items }
-                <button onclick={ctx.link().callback(|_| LoansMsg::Calculate)}>{ "Calculate" }</button>
+                <button onclick={ctx.link().callback(|_| LoansMsg::Calculate)} class="btn space-right">
+                    { "Calculate" }
+                </button>
+                <button onclick={ctx.link().callback(|_| LoansMsg::AddLoan)} class="btn">
+                    { "Add Loan" }
+                </button>
                 { self.optimal_payoff_display.clone() }
             </div>
         }
