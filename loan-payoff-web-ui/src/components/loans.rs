@@ -46,6 +46,7 @@ impl Component for Loans {
     fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             LoansMsg::Calculate => {
+                // TODO: self.optimal_payoff_display = "".to_owned(), then continue
                 let mut loans = Vec::new();
                 for loan in self.loans.iter() {
                     loans.push(loan);
@@ -97,7 +98,11 @@ impl Component for Loans {
                 <button onclick={ctx.link().callback(|_| LoansMsg::AddLoan)} class="btn">
                     { "Add Loan" }
                 </button>
-                { self.optimal_payoff_display.clone() }
+                if !self.optimal_payoff_display.is_empty() {
+                    <div>
+                        { self.optimal_payoff_display.clone() }
+                    </div>
+                }
             </div>
         }
     }
