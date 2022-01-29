@@ -22,12 +22,16 @@ impl Component for LoanRow {
 
         html! {
             <div class="row">
-                <div class="col l2">{ format!("Loan: {}", calculated_payment_amount) }</div>
                 <div class="col l2">{ ctx.props().loan.name.clone() }</div>
                 <div class="col l2">{ ctx.props().loan.initial_value.clone() }</div>
                 <div class="col l2">{ ctx.props().loan.rate.clone() }</div>
                 <div class="col l2">{ ctx.props().loan.number_of_payments.clone() }</div>
-                <div class="col l2">{ ctx.props().loan.payment_amount.clone() }</div>
+                <div class="col l2">{ calculated_payment_amount }</div>
+                <div class="col l2">
+                    <span class="btn">
+                        <i class="small material-icons">{ "delete_forever" }</i>
+                    </span>
+                </div>
             </div>
         }
     }

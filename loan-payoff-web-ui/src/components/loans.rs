@@ -112,6 +112,14 @@ impl Component for Loans {
                     <label for="extra_payment" class="active">{ "Extra Payment" }</label>
                 </div>
                 { "loans:" }
+                <div class="row">
+                    <div class="col l2">{ "Name" }</div>
+                    <div class="col l2">{ "Loan Amount" }</div>
+                    <div class="col l2">{ "Interest Rate" }</div>
+                    <div class="col l2">{ "Number of Payments" }</div>
+                    <div class="col l2">{ "Monthly Payment" }</div>
+                    <div class="col l2"></div>
+                </div>
                 { items }
                 <button onclick={link.callback(|_| LoansMsg::Calculate)} class="btn space-right">
                     { "Calculate" }
