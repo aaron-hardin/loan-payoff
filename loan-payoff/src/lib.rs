@@ -121,6 +121,8 @@ pub fn pay_loans(loans: &Vec<&Loan>, extra_amount: f64, ordering: &[usize]) -> (
     let mut is_debt_snowball = true;
     let mut max_cost = 0.0;
 
+    let mut max_number_payments = 0;
+
     for &i in ordering.iter() {
         let payment_amount = round_to_currency(loans[i].calculate_payment_amount());
         if !approx_equal(payment_amount, loans[i].payment_amount, DEFAULT_ROUNDING_PLACES) {
@@ -133,6 +135,10 @@ pub fn pay_loans(loans: &Vec<&Loan>, extra_amount: f64, ordering: &[usize]) -> (
             max_cost = loans[i].initial_value;
         }
 
+        if loans[i].number_of_payments > max_number_payments {
+            max_number_payments = loans[i].number_of_payments;
+        }
+
         remaining_amounts[i] = loans[i].initial_value;
         expected_costs[i] = round_to_currency(loans[i].payment_amount * loans[i].number_of_payments as f64);
     }
@@ -141,6 +147,13 @@ pub fn pay_loans(loans: &Vec<&Loan>, extra_amount: f64, ordering: &[usize]) -> (
     let original_extra_amount = extra_amount;
     while ordering.iter().any(|&i| remaining_amounts[i] > 0.0 && !approx_equal(remaining_amounts[i], 0.0, DEFAULT_ROUNDING_PLACES)) {
         count += 1;
+
+        if count > max_number_payments {
+            for &ix in ordering.iter() {
+                log::error!("Loan={}, Remaining Amount={}", loans[ix], remaining_amounts[ix]);
+            }
+            panic!("Went too long, should have finished in at most {} periods", max_number_payments);
+        }
 
         let mut extra_amount_this_period = extra_amount;
         for &ix in ordering.iter() {
