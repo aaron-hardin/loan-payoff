@@ -8,7 +8,6 @@ This application is intended as a fun project and makes a lot of assumptions abo
 
 # TODO
 - Make loans editable
-  - Add field for extra payment amount
 - Allow adding/removing loans
 - Error checking/feedback to user when entered information doesn't match up
 - Add unit tests (gitlab ci should run them)
