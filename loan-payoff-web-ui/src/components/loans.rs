@@ -102,7 +102,6 @@ impl Component for Loans {
                     />
                     <label for="extra_payment" class="active">{ "Extra Payment" }</label>
                 </div>
-                { "loans:" }
                 <div class="row">
                     <div class="col l2">{ "Name" }</div>
                     <div class="col l2">{ "Loan Amount" }</div>

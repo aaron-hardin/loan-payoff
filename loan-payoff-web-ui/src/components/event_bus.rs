@@ -8,6 +8,7 @@ pub enum Request {
     AddLoan,
     Bump, // just used to get initial load
     DeleteLoan(usize),
+    UpdateName(String, usize),
 }
 
 pub struct EventBus {
@@ -64,7 +65,10 @@ impl Agent for EventBus {
             Request::DeleteLoan(index) => {
                 self.loans.remove(index);
             },
-            Request::Bump => { /* just responds below */ }
+            Request::Bump => { /* just responds below */ },
+            Request::UpdateName(new_name, index) => {
+                self.loans[index].name = new_name;
+            },
         }
 
         for sub in self.subscribers.iter() {

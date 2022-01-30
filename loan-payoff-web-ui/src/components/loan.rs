@@ -1,10 +1,12 @@
 use super::event_bus::{EventBus, Request};
 use loan_payoff::{Loan, round_to_currency};
+use web_sys::{HtmlInputElement, InputEvent};
 use yew::prelude::*;
 use yew_agent::{Dispatched, Dispatcher};
 
 pub enum LoanMsg {
     Delete(i64),
+    UpdateName(String, usize),
 }
 
 pub struct LoanRow {
@@ -33,6 +35,10 @@ impl Component for LoanRow {
                 self.event_bus.send(Request::DeleteLoan(index as usize));
                 true
             },
+            LoanMsg::UpdateName(new_name, index) => {
+                self.event_bus.send(Request::UpdateName(new_name, index));
+                true
+            },
         }
     }
 
@@ -44,7 +50,20 @@ impl Component for LoanRow {
 
         html! {
             <div class="row">
-                <div class="col l2">{ ctx.props().loan.name.clone() }</div>
+                <div class="col l2">
+                    <div class="input-field">
+                        <input
+                            type="text"
+                            id="loan_name"
+                            oninput={link.callback(move |event: InputEvent| {
+                                let input: HtmlInputElement = event.target_unchecked_into();
+                                LoanMsg::UpdateName(input.value(), index as usize)
+                            })}
+                            value={ctx.props().loan.name.clone()}
+                        />
+                        // TODO: disabling label for now because it looks funny, need to revisit <label for="loan_name" class="active">{ "Name" }</label>
+                    </div>
+                </div>
                 <div class="col l2">{ ctx.props().loan.initial_value.clone() }</div>
                 <div class="col l2">{ ctx.props().loan.rate.clone() }</div>
                 <div class="col l2">{ ctx.props().loan.number_of_payments.clone() }</div>
