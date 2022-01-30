@@ -9,6 +9,8 @@ edition = "2021"
 gloo-utils = "0.1"
 loan-payoff = { path = "../loan-payoff" }
 log = "0.4.6"
+serde = { version = "1.0", features = ["derive"] }
 wasm-logger = "0.2.0"
 web-sys = { version = "0.3", features = ["Event","EventTarget","InputEvent"] }
 yew = "0.19.3"
+yew-agent = "0.1.0"

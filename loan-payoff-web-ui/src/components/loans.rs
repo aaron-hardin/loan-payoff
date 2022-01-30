@@ -1,49 +1,42 @@
+use super::event_bus::{EventBus, Request};
 use crate::components::LoanRow;
 use loan_payoff::{Loan, pay_loans_all_orderings};
 use web_sys::{HtmlInputElement, InputEvent};
 use yew::prelude::*;
 use yew::virtual_dom::VChild;
+use yew_agent::{Bridge, Bridged, Dispatched, Dispatcher};
 
 pub enum LoansMsg {
     AddLoan,
     Calculate,
     UpdateExtraAmount(String),
+    UpdateLoans(Vec<Loan>),
 }
 
 pub struct Loans {
     loans: Vec<Loan>,
     extra_amount: f64,
     optimal_payoff_display: String,
+    event_bus: Dispatcher<EventBus>,
+    _producer: Box<dyn Bridge<EventBus>>,
 }
 
 impl Component for Loans {
     type Message = LoansMsg;
     type Properties = ();
 
-    fn create(_ctx: &Context<Self>) -> Self {
-        Self {
-            loans: vec![
-                Loan {
-                    name: "eek".to_owned(),
-                    initial_value: 1000.00,
-                    rate: 0.023,
-                    number_of_payments: 23,
-                    // TODO: test with bad values
-                    payment_amount: 56.47,
-                },
-                Loan {
-                    name: "num2".to_owned(),
-                    initial_value: 10000.00,
-                    rate: 0.00625,
-                    number_of_payments: 48,
-                    // TODO: test with bad values: payment_amount: 234.43
-                    payment_amount: 241.79,
-                },
-            ],
+    fn create(ctx: &Context<Self>) -> Self {
+        let mut me = Self {
+            loans: Vec::new(),
             // TODO: this should be set via ui as well
             extra_amount: 100.0,
-            optimal_payoff_display: "".to_owned()
-        }
+            optimal_payoff_display: "".to_owned(),
+            event_bus: EventBus::dispatcher(),
+            _producer: EventBus::bridge(ctx.link().callback(LoansMsg::UpdateLoans)),
+        };
+
+        me.event_bus.send(Request::Bump);
+        me
     }
 
     fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
@@ -68,14 +61,7 @@ impl Component for Loans {
                 true
             },
             LoansMsg::AddLoan => {
-                let loan3 = Loan {
-                    name: "num3".to_owned(),
-                    initial_value: 10000.00,
-                    rate: 0.014,
-                    number_of_payments: 48,
-                    payment_amount: 287.52
-                };
-                self.loans.push(loan3);
+                self.event_bus.send(Request::AddLoan);
                 true
             },
             LoansMsg::UpdateExtraAmount(content) => {
@@ -83,6 +69,10 @@ impl Component for Loans {
                 self.extra_amount = content.parse::<f64>().unwrap();
                 true
             },
+            LoansMsg::UpdateLoans(loans) => {
+                self.loans = loans;
+                true
+            }
         }
     }
 
@@ -91,9 +81,10 @@ impl Component for Loans {
         let items: Vec<VChild<LoanRow>> = self
             .loans
             .iter()
-            .map(|item| {
+            .enumerate()
+            .map(|(index, item)| {
                 html_nested! {
-                    <LoanRow loan={item.clone()} />
+                    <LoanRow loan={item.clone()} index={index as i64} />
                 }
             }).collect();
 

@@ -1,3 +1,4 @@
+mod event_bus;
 mod loan;
 mod loans;
 
