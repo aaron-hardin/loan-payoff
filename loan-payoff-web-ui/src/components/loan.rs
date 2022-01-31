@@ -6,6 +6,7 @@ use yew_agent::{Dispatched, Dispatcher};
 
 pub enum LoanMsg {
     Delete(i64),
+    UpdateInitialValue(String, usize),
     UpdateName(String, usize),
 }
 
@@ -35,6 +36,20 @@ impl Component for LoanRow {
                 self.event_bus.send(Request::DeleteLoan(index as usize));
                 true
             },
+            LoanMsg::UpdateInitialValue(new_amount, index) => {
+                let new_amount = new_amount.parse::<f64>();
+                match new_amount {
+                    Ok(new_amount) => {
+                        self.event_bus.send(Request::UpdateInitialValue(new_amount, index));
+                    },
+                    Err(e) => {
+                        // TODO: handle error better
+                        log::error!("Bad parse {:?}", e);
+                    }
+                }
+                
+                true
+            },
             LoanMsg::UpdateName(new_name, index) => {
                 self.event_bus.send(Request::UpdateName(new_name, index));
                 true
@@ -54,6 +69,7 @@ impl Component for LoanRow {
                     <div class="input-field">
                         <input
                             type="text"
+                            // TODO: might need more specific name since this is in loop
                             id="loan_name"
                             oninput={link.callback(move |event: InputEvent| {
                                 let input: HtmlInputElement = event.target_unchecked_into();
@@ -61,10 +77,26 @@ impl Component for LoanRow {
                             })}
                             value={ctx.props().loan.name.clone()}
                         />
-                        // TODO: disabling label for now because it looks funny, need to revisit <label for="loan_name" class="active">{ "Name" }</label>
+                        // TODO: disabling label for now because it looks funny, need to revisit
+                        // <label for="loan_name" class="active">{ "Name" }</label>
                     </div>
                 </div>
-                <div class="col l2">{ ctx.props().loan.initial_value.clone() }</div>
+                <div class="col l2">
+                    <div class="input-field">
+                        <input
+                            type="text"
+                            // TODO: might need more specific name since this is in loop
+                            id="loan_initial_value"
+                            oninput={link.callback(move |event: InputEvent| {
+                                let input: HtmlInputElement = event.target_unchecked_into();
+                                LoanMsg::UpdateInitialValue(input.value(), index as usize)
+                            })}
+                            value={ctx.props().loan.initial_value.clone().to_string()}
+                        />
+                        // TODO: disabling label for now because it looks funny, need to revisit
+                        // <label for="loan_initial_value" class="active">{ "Loan Amount" }</label>
+                    </div>
+                </div>
                 <div class="col l2">{ ctx.props().loan.rate.clone() }</div>
                 <div class="col l2">{ ctx.props().loan.number_of_payments.clone() }</div>
                 <div class="col l2">{ calculated_payment_amount }</div>

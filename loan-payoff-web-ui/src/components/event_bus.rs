@@ -1,4 +1,4 @@
-use loan_payoff::{Loan};
+use loan_payoff::{Loan, round_to_currency};
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use yew_agent::{Agent, AgentLink, Context, HandlerId};
@@ -8,6 +8,7 @@ pub enum Request {
     AddLoan,
     Bump, // just used to get initial load
     DeleteLoan(usize),
+    UpdateInitialValue(f64, usize),
     UpdateName(String, usize),
 }
 
@@ -66,6 +67,15 @@ impl Agent for EventBus {
                 self.loans.remove(index);
             },
             Request::Bump => { /* just responds below */ },
+            Request::UpdateInitialValue(new_amount, index) => {
+                self.loans[index].initial_value = new_amount;
+                let calculated_payment_amount = round_to_currency(self.loans[index].calculate_payment_amount());
+                if calculated_payment_amount > 0.0 {
+                    self.loans[index].payment_amount = calculated_payment_amount;
+                } else {
+                    // TODO: set error flag and mark row as invalid
+                }
+            },
             Request::UpdateName(new_name, index) => {
                 self.loans[index].name = new_name;
             },
