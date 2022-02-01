@@ -9,6 +9,7 @@ pub enum Request {
     Bump, // just used to get initial load
     DeleteLoan(usize),
     UpdateInitialValue(f64, usize),
+    UpdateInterestRate(f64, usize),
     UpdateName(String, usize),
 }
 
@@ -69,6 +70,15 @@ impl Agent for EventBus {
             Request::Bump => { /* just responds below */ },
             Request::UpdateInitialValue(new_amount, index) => {
                 self.loans[index].initial_value = new_amount;
+                let calculated_payment_amount = round_to_currency(self.loans[index].calculate_payment_amount());
+                if calculated_payment_amount > 0.0 {
+                    self.loans[index].payment_amount = calculated_payment_amount;
+                } else {
+                    // TODO: set error flag and mark row as invalid
+                }
+            },
+            Request::UpdateInterestRate(new_rate, index) => {
+                self.loans[index].rate = new_rate;
                 let calculated_payment_amount = round_to_currency(self.loans[index].calculate_payment_amount());
                 if calculated_payment_amount > 0.0 {
                     self.loans[index].payment_amount = calculated_payment_amount;

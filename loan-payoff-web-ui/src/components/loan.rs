@@ -7,6 +7,7 @@ use yew_agent::{Dispatched, Dispatcher};
 pub enum LoanMsg {
     Delete(i64),
     UpdateInitialValue(String, usize),
+    UpdateInterestRate(String, usize),
     UpdateName(String, usize),
 }
 
@@ -41,6 +42,20 @@ impl Component for LoanRow {
                 match new_amount {
                     Ok(new_amount) => {
                         self.event_bus.send(Request::UpdateInitialValue(new_amount, index));
+                    },
+                    Err(e) => {
+                        // TODO: handle error better
+                        log::error!("Bad parse {:?}", e);
+                    }
+                }
+                
+                true
+            },
+            LoanMsg::UpdateInterestRate(new_rate, index) => {
+                let new_rate = new_rate.parse::<f64>();
+                match new_rate {
+                    Ok(new_rate) => {
+                        self.event_bus.send(Request::UpdateInterestRate(new_rate, index));
                     },
                     Err(e) => {
                         // TODO: handle error better
@@ -97,7 +112,22 @@ impl Component for LoanRow {
                         // <label for="loan_initial_value" class="active">{ "Loan Amount" }</label>
                     </div>
                 </div>
-                <div class="col l2">{ ctx.props().loan.rate.clone() }</div>
+                <div class="col l2">
+                    <div class="input-field">
+                        <input
+                            type="text"
+                            // TODO: might need more specific name since this is in loop
+                            id="loan_interest_rate"
+                            oninput={link.callback(move |event: InputEvent| {
+                                let input: HtmlInputElement = event.target_unchecked_into();
+                                LoanMsg::UpdateInterestRate(input.value(), index as usize)
+                            })}
+                            value={ctx.props().loan.rate.clone().to_string()}
+                        />
+                        // TODO: disabling label for now because it looks funny, need to revisit
+                        // <label for="loan_interest_rate" class="active">{ "Interest Rate" }</label>
+                    </div>
+                </div>
                 <div class="col l2">{ ctx.props().loan.number_of_payments.clone() }</div>
                 <div class="col l2">{ calculated_payment_amount }</div>
                 <div class="col l2">

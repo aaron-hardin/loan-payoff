@@ -9,5 +9,6 @@ This application is intended as a fun project and makes a lot of assumptions abo
 # TODO
 - Make loans editable
 - Error checking/feedback to user when entered information doesn't match up
+   - Should also cover the case where the loans would never be paid off
 - Add unit tests (gitlab ci should run them)
 - Cleanup code (likely has extra clone/to_owned that could be refactored)
