@@ -11,6 +11,7 @@ pub enum Request {
     UpdateInitialValue(f64, usize),
     UpdateInterestRate(f64, usize),
     UpdateName(String, usize),
+    UpdateNumberOfPayments(i64, usize),
 }
 
 pub struct EventBus {
@@ -88,6 +89,15 @@ impl Agent for EventBus {
             },
             Request::UpdateName(new_name, index) => {
                 self.loans[index].name = new_name;
+            },
+            Request::UpdateNumberOfPayments(new_number_of_payments, index) => {
+                self.loans[index].number_of_payments = new_number_of_payments;
+                let calculated_payment_amount = round_to_currency(self.loans[index].calculate_payment_amount());
+                if calculated_payment_amount > 0.0 {
+                    self.loans[index].payment_amount = calculated_payment_amount;
+                } else {
+                    // TODO: set error flag and mark row as invalid
+                }
             },
         }
 

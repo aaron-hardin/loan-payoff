@@ -9,6 +9,7 @@ pub enum LoanMsg {
     UpdateInitialValue(String, usize),
     UpdateInterestRate(String, usize),
     UpdateName(String, usize),
+    UpdateNumberOfPayments(String, usize),
 }
 
 pub struct LoanRow {
@@ -67,6 +68,20 @@ impl Component for LoanRow {
             },
             LoanMsg::UpdateName(new_name, index) => {
                 self.event_bus.send(Request::UpdateName(new_name, index));
+                true
+            },
+            LoanMsg::UpdateNumberOfPayments(new_number_of_payments, index) => {
+                let new_number_of_payments = new_number_of_payments.parse::<i64>();
+                match new_number_of_payments {
+                    Ok(new_number_of_payments) => {
+                        self.event_bus.send(Request::UpdateNumberOfPayments(new_number_of_payments, index));
+                    },
+                    Err(e) => {
+                        // TODO: handle error better
+                        log::error!("Bad parse {:?}", e);
+                    }
+                }
+                
                 true
             },
         }
@@ -128,7 +143,22 @@ impl Component for LoanRow {
                         // <label for="loan_interest_rate" class="active">{ "Interest Rate" }</label>
                     </div>
                 </div>
-                <div class="col l2">{ ctx.props().loan.number_of_payments.clone() }</div>
+                <div class="col l2">
+                    <div class="input-field">
+                        <input
+                            type="text"
+                            // TODO: might need more specific name since this is in loop
+                            id="loan_number_of_payments"
+                            oninput={link.callback(move |event: InputEvent| {
+                                let input: HtmlInputElement = event.target_unchecked_into();
+                                LoanMsg::UpdateNumberOfPayments(input.value(), index as usize)
+                            })}
+                            value={ctx.props().loan.number_of_payments.clone().to_string()}
+                        />
+                        // TODO: disabling label for now because it looks funny, need to revisit
+                        // <label for="loan_number_of_payments" class="active">{ "Number of Payments" }</label>
+                    </div>
+                </div>
                 <div class="col l2">{ calculated_payment_amount }</div>
                 <div class="col l2">
                     <span class="btn" onclick={link.callback(move |_| LoanMsg::Delete(index))}>
