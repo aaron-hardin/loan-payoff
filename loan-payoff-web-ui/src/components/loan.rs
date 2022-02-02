@@ -95,7 +95,7 @@ impl Component for LoanRow {
 
         html! {
             <div class="row">
-                <div class="col l2">
+                <div class="col l2 s12">
                     <div class="input-field">
                         <input
                             type="text"
@@ -108,10 +108,10 @@ impl Component for LoanRow {
                             value={ctx.props().loan.name.clone()}
                         />
                         // TODO: disabling label for now because it looks funny, need to revisit
-                        // <label for="loan_name" class="active">{ "Name" }</label>
+                        <label for="loan_name" class="active hide-on-med-and-up">{ "Name" }</label>
                     </div>
                 </div>
-                <div class="col l2">
+                <div class="col l2 s12">
                     <div class="input-field">
                         <input
                             type="text"
@@ -124,10 +124,10 @@ impl Component for LoanRow {
                             value={ctx.props().loan.initial_value.clone().to_string()}
                         />
                         // TODO: disabling label for now because it looks funny, need to revisit
-                        // <label for="loan_initial_value" class="active">{ "Loan Amount" }</label>
+                        <label for="loan_initial_value" class="active hide-on-med-and-up">{ "Loan Amount" }</label>
                     </div>
                 </div>
-                <div class="col l2">
+                <div class="col l2 s12">
                     <div class="input-field">
                         <input
                             type="text"
@@ -140,10 +140,10 @@ impl Component for LoanRow {
                             value={ctx.props().loan.rate.clone().to_string()}
                         />
                         // TODO: disabling label for now because it looks funny, need to revisit
-                        // <label for="loan_interest_rate" class="active">{ "Interest Rate" }</label>
+                        <label for="loan_interest_rate" class="active hide-on-med-and-up">{ "Interest Rate" }</label>
                     </div>
                 </div>
-                <div class="col l2">
+                <div class="col l2 s12">
                     <div class="input-field">
                         <input
                             type="text"
@@ -156,11 +156,14 @@ impl Component for LoanRow {
                             value={ctx.props().loan.number_of_payments.clone().to_string()}
                         />
                         // TODO: disabling label for now because it looks funny, need to revisit
-                        // <label for="loan_number_of_payments" class="active">{ "Number of Payments" }</label>
+                        <label for="loan_number_of_payments" class="active hide-on-med-and-up">{ "Number of Payments" }</label>
                     </div>
                 </div>
-                <div class="col l2">{ calculated_payment_amount }</div>
-                <div class="col l2">
+                <div class="col l2 s12">
+                    <span class="hide-on-med-and-up">{ "Monthly Payment: " }</span>
+                    { calculated_payment_amount }
+                </div>
+                <div class="col l2 s12">
                     <span class="btn" onclick={link.callback(move |_| LoanMsg::Delete(index))}>
                         <i class="small material-icons">{ "delete_forever" }</i>
                     </span>
