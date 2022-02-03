@@ -114,7 +114,7 @@ impl Component for LoanRow {
                 <div class="col l2 s12">
                     <div class="input-field">
                         <input
-                            type="text"
+                            type="number"
                             // TODO: might need more specific name since this is in loop
                             id="loan_initial_value"
                             oninput={link.callback(move |event: InputEvent| {
@@ -130,7 +130,8 @@ impl Component for LoanRow {
                 <div class="col l2 s12">
                     <div class="input-field">
                         <input
-                            type="text"
+                            type="number"
+                            step=".001"
                             // TODO: might need more specific name since this is in loop
                             id="loan_interest_rate"
                             oninput={link.callback(move |event: InputEvent| {
@@ -146,7 +147,7 @@ impl Component for LoanRow {
                 <div class="col l2 s12">
                     <div class="input-field">
                         <input
-                            type="text"
+                            type="number"
                             // TODO: might need more specific name since this is in loop
                             id="loan_number_of_payments"
                             oninput={link.callback(move |event: InputEvent| {
