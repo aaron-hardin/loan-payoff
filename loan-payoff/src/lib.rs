@@ -71,17 +71,23 @@ impl Loan {
     }
 }
 
-pub fn pay_loans_all_orderings(loans: &Vec<&Loan>, extra_amount: f64) -> OptimalPayoff {
+pub fn pay_loans_all_orderings(loans: &Vec<&Loan>, extra_amount: f64) -> Result<OptimalPayoff, Error> {
     // https://www.quickperm.org/
     let mut ordering = vec![0; loans.len()];
     for i in 0..ordering.len() { ordering[i] = i }
 
     // initial ordering
     let mut best_savings = -1.0;
-    let mut best_ordering = ordering.clone();
-    let (_is_debt_snowball, _actual_costs_total, savings_total) = pay_loans(&loans, extra_amount, &ordering);
-    if savings_total > best_savings {
-        best_savings = savings_total;
+    let mut best_ordering = Vec::new();
+    match pay_loans(&loans, extra_amount, &ordering) {
+        Ok((_is_debt_snowball, _actual_costs_total, savings_total)) => {
+            if savings_total > best_savings {
+                best_savings = savings_total;
+                best_ordering = ordering.clone();
+            }
+        },
+        Err(Error::LoanGoesToInf) => { /* noop: if no loan orderings converge then we return this error below */ },
+        Err(e) => return Err(e),
     }
 
     let n = loans.len();
@@ -93,10 +99,15 @@ pub fn pay_loans_all_orderings(loans: &Vec<&Loan>, extra_amount: f64) -> Optimal
         let j = if i % 2 == 0 { 0 } else { p[i] };
         ordering.swap(j, i);
 
-        let (_is_debt_snowball, _actual_costs_total, savings_total) = pay_loans(&loans, extra_amount, &ordering);
-        if savings_total > best_savings {
-            best_savings = savings_total;
-            best_ordering = ordering.clone();
+        match pay_loans(&loans, extra_amount, &ordering) {
+            Ok((_is_debt_snowball, _actual_costs_total, savings_total)) => {
+                if savings_total > best_savings {
+                    best_savings = savings_total;
+                    best_ordering = ordering.clone();
+                }
+            },
+            Err(Error::LoanGoesToInf) => { /* noop: if no loan orderings converge then we return this error below */ },
+            Err(e) => return Err(e),
         }
 
         i = 1;
@@ -106,13 +117,17 @@ pub fn pay_loans_all_orderings(loans: &Vec<&Loan>, extra_amount: f64) -> Optimal
         } // end while (p[i] is equal to 0)
     } // end while (i < N)
 
-    OptimalPayoff {
+    if best_savings < 0.0 {
+        return Err(Error::LoanGoesToInf);
+    }
+
+    Ok(OptimalPayoff {
         ordering: best_ordering,
         savings: best_savings,
-    }
+    })
 }
 
-pub fn pay_loans(loans: &Vec<&Loan>, extra_amount: f64, ordering: &[usize]) -> (bool, f64, f64) {
+pub fn pay_loans(loans: &Vec<&Loan>, extra_amount: f64, ordering: &[usize]) -> Result<(bool, f64, f64), Error> {
     log::debug!("Pay loans {:?}", ordering);
     let mut remaining_amounts = vec![0.0; loans.len()];
     let mut actual_costs = vec![0.0; loans.len()];
@@ -154,7 +169,8 @@ pub fn pay_loans(loans: &Vec<&Loan>, extra_amount: f64, ordering: &[usize]) -> (
             for &ix in ordering.iter() {
                 log::error!("Loan={}, Remaining Amount={}", loans[ix], remaining_amounts[ix]);
             }
-            panic!("Went too long, should have finished in at most {} periods", max_number_payments);
+            log::error!("Went too long, should have finished in at most {} periods", max_number_payments);
+            return Err(Error::LoanGoesToInf);
         }
 
         let mut extra_amount_this_period = extra_amount;
@@ -202,7 +218,7 @@ pub fn pay_loans(loans: &Vec<&Loan>, extra_amount: f64, ordering: &[usize]) -> (
 
     log::info!("Pay loans with ordering {:?}, total amount {}, savings {}", ordering, actual_costs_total, savings_total);
 
-    (is_debt_snowball, actual_costs_total, savings_total)
+    Ok((is_debt_snowball, actual_costs_total, savings_total))
 }
 
 impl fmt::Display for Loan {
@@ -218,4 +234,10 @@ pub fn approx_equal(a: f64, b: f64, decimal_places: u8) -> bool {
 
 pub fn round_to_currency(a: f64) -> f64 {
     (a * 100.0).round() / 100.0
+}
+
+#[derive(Debug)]
+pub enum Error {
+    LoanGoesToInf,
+    OtherError(String),
 }

@@ -25,7 +25,7 @@ fn main() {
 
     let extra_amount = 100.0;
     let loans = vec!(&loan1, &loan2, &loan3);
-    let optimal_payoff = pay_loans_all_orderings(&loans, extra_amount);
+    let optimal_payoff = pay_loans_all_orderings(&loans, extra_amount).expect("Failed to pay loans");
 
     println!(
         "Best ordering = {}, with savings ${}",

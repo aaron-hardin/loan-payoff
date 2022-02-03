@@ -47,14 +47,19 @@ impl Component for Loans {
                 for loan in self.loans.iter() {
                     loans.push(loan);
                 }
-                let optimal_payoff = pay_loans_all_orderings(&loans, self.extra_amount);
-
-                let stra = format!(
-                    "Best ordering = {}, with savings ${}",
-                    optimal_payoff.ordering.iter().map(|&i| loans[i].name.clone()).collect::<Vec<String>>().join(" -> "),
-                    optimal_payoff.savings
-                );
-                self.optimal_payoff_display = stra;
+                match pay_loans_all_orderings(&loans, self.extra_amount) {
+                    Ok(optimal_payoff) => {
+                        let stra = format!(
+                            "Best ordering = {}, with savings ${}",
+                            optimal_payoff.ordering.iter().map(|&i| loans[i].name.clone()).collect::<Vec<String>>().join(" -> "),
+                            optimal_payoff.savings
+                        );
+                        self.optimal_payoff_display = stra;
+                    },
+                    Err(e) => {
+                        self.optimal_payoff_display = format!("Err {:?}", e);
+                    }
+                }
 
                 // the value has changed so we need to
                 // re-render for it to appear on the page
