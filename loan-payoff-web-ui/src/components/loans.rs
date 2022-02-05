@@ -89,7 +89,7 @@ impl Component for Loans {
             .enumerate()
             .map(|(index, item)| {
                 html_nested! {
-                    <LoanRow loan={item.clone()} index={index as i64} />
+                    <LoanRow loan={item.clone()} index={index} />
                 }
             }).collect();
 

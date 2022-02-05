@@ -1,15 +1,16 @@
 use super::event_bus::{EventBus, Request};
 use loan_payoff::{Loan, round_to_currency};
+use std::fmt::{Debug, Display};
 use web_sys::{HtmlInputElement, InputEvent};
 use yew::prelude::*;
 use yew_agent::{Dispatched, Dispatcher};
 
 pub enum LoanMsg {
-    Delete(i64),
-    UpdateInitialValue(String, usize),
-    UpdateInterestRate(String, usize),
+    Delete(usize),
+    UpdateInitialValue(f64, usize),
+    UpdateInterestRate(f64, usize),
     UpdateName(String, usize),
-    UpdateNumberOfPayments(String, usize),
+    UpdateNumberOfPayments(i64, usize),
 }
 
 pub struct LoanRow {
@@ -19,7 +20,7 @@ pub struct LoanRow {
 #[derive(Clone, PartialEq, Properties)]
 pub struct LoanProps {
     pub loan: Loan,
-    pub index: i64,
+    pub index: usize,
 }
 
 impl Component for LoanRow {
@@ -35,35 +36,15 @@ impl Component for LoanRow {
     fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             LoanMsg::Delete(index) => {
-                self.event_bus.send(Request::DeleteLoan(index as usize));
+                self.event_bus.send(Request::DeleteLoan(index));
                 true
             },
             LoanMsg::UpdateInitialValue(new_amount, index) => {
-                let new_amount = new_amount.parse::<f64>();
-                match new_amount {
-                    Ok(new_amount) => {
-                        self.event_bus.send(Request::UpdateInitialValue(new_amount, index));
-                    },
-                    Err(e) => {
-                        // TODO: handle error better
-                        log::error!("Bad parse {:?}", e);
-                    }
-                }
-                
+                self.event_bus.send(Request::UpdateInitialValue(new_amount, index));
                 true
             },
             LoanMsg::UpdateInterestRate(new_rate, index) => {
-                let new_rate = new_rate.parse::<f64>();
-                match new_rate {
-                    Ok(new_rate) => {
-                        self.event_bus.send(Request::UpdateInterestRate(new_rate, index));
-                    },
-                    Err(e) => {
-                        // TODO: handle error better
-                        log::error!("Bad parse {:?}", e);
-                    }
-                }
-                
+                self.event_bus.send(Request::UpdateInterestRate(new_rate, index));
                 true
             },
             LoanMsg::UpdateName(new_name, index) => {
@@ -71,17 +52,7 @@ impl Component for LoanRow {
                 true
             },
             LoanMsg::UpdateNumberOfPayments(new_number_of_payments, index) => {
-                let new_number_of_payments = new_number_of_payments.parse::<i64>();
-                match new_number_of_payments {
-                    Ok(new_number_of_payments) => {
-                        self.event_bus.send(Request::UpdateNumberOfPayments(new_number_of_payments, index));
-                    },
-                    Err(e) => {
-                        // TODO: handle error better
-                        log::error!("Bad parse {:?}", e);
-                    }
-                }
-                
+                self.event_bus.send(Request::UpdateNumberOfPayments(new_number_of_payments, index));
                 true
             },
         }
@@ -99,66 +70,43 @@ impl Component for LoanRow {
                     <div class="input-field">
                         <input
                             type="text"
-                            // TODO: might need more specific name since this is in loop
                             id="loan_name"
                             oninput={link.callback(move |event: InputEvent| {
                                 let input: HtmlInputElement = event.target_unchecked_into();
-                                LoanMsg::UpdateName(input.value(), index as usize)
+                                LoanMsg::UpdateName(input.value(), index)
                             })}
                             value={ctx.props().loan.name.clone()}
                         />
-                        // TODO: disabling label for now because it looks funny, need to revisit
                         <label for="loan_name" class="active hide-on-med-and-up">{ "Name" }</label>
                     </div>
                 </div>
                 <div class="col l2 s12">
-                    <div class="input-field">
-                        <input
-                            type="number"
-                            // TODO: might need more specific name since this is in loop
-                            id="loan_initial_value"
-                            oninput={link.callback(move |event: InputEvent| {
-                                let input: HtmlInputElement = event.target_unchecked_into();
-                                LoanMsg::UpdateInitialValue(input.value(), index as usize)
-                            })}
-                            value={ctx.props().loan.initial_value.clone().to_string()}
-                        />
-                        // TODO: disabling label for now because it looks funny, need to revisit
-                        <label for="loan_initial_value" class="active hide-on-med-and-up">{ "Loan Amount" }</label>
-                    </div>
+                    <InputNumber<f64>
+                        value={ctx.props().loan.initial_value}
+                        {index}
+                        id="loan_initial_value"
+                        label="Loan Amount"
+                        request={link.callback(move |new_val: f64| LoanMsg::UpdateInitialValue(new_val, index))}
+                    />
                 </div>
                 <div class="col l2 s12">
-                    <div class="input-field">
-                        <input
-                            type="number"
-                            step=".001"
-                            // TODO: might need more specific name since this is in loop
-                            id="loan_interest_rate"
-                            oninput={link.callback(move |event: InputEvent| {
-                                let input: HtmlInputElement = event.target_unchecked_into();
-                                LoanMsg::UpdateInterestRate(input.value(), index as usize)
-                            })}
-                            value={ctx.props().loan.rate.clone().to_string()}
-                        />
-                        // TODO: disabling label for now because it looks funny, need to revisit
-                        <label for="loan_interest_rate" class="active hide-on-med-and-up">{ "Interest Rate" }</label>
-                    </div>
+                    <InputNumber<f64>
+                        value={ctx.props().loan.rate}
+                        step=".001"
+                        {index}
+                        id="loan_interest_rate"
+                        label="Interest Rate"
+                        request={link.callback(move |new_val: f64| LoanMsg::UpdateInterestRate(new_val, index))}
+                    />
                 </div>
                 <div class="col l2 s12">
-                    <div class="input-field">
-                        <input
-                            type="number"
-                            // TODO: might need more specific name since this is in loop
-                            id="loan_number_of_payments"
-                            oninput={link.callback(move |event: InputEvent| {
-                                let input: HtmlInputElement = event.target_unchecked_into();
-                                LoanMsg::UpdateNumberOfPayments(input.value(), index as usize)
-                            })}
-                            value={ctx.props().loan.number_of_payments.clone().to_string()}
-                        />
-                        // TODO: disabling label for now because it looks funny, need to revisit
-                        <label for="loan_number_of_payments" class="active hide-on-med-and-up">{ "Number of Payments" }</label>
-                    </div>
+                    <InputNumber<i64>
+                        value={ctx.props().loan.number_of_payments}
+                        {index}
+                        id="loan_number_of_payments"
+                        label="Number of Payments"
+                        request={link.callback(move |new_val: i64| LoanMsg::UpdateNumberOfPayments(new_val, index))}
+                    />
                 </div>
                 <div class="col l2 s12">
                     <span class="hide-on-med-and-up">{ "Monthly Payment: " }</span>
@@ -169,6 +117,80 @@ impl Component for LoanRow {
                         <i class="small material-icons">{ "delete_forever" }</i>
                     </span>
                 </div>
+            </div>
+        }
+    }
+}
+
+pub enum InputNumberMsg {
+    UpdateValue(String),
+}
+
+#[derive(Clone, PartialEq, Properties)]
+pub struct InputNumberProps<T: PartialEq> {
+    pub value: T,
+    pub index: usize,
+    pub request: Callback<T>,
+    pub id: String,
+    pub label: String,
+    #[prop_or("1".to_owned())]
+    pub step: String,
+}
+
+pub struct InputNumber<T> {
+    pub value: String,
+    pub initial_value: T,
+}
+
+impl<T: Copy + 'static> Component for InputNumber<T>
+ where
+     T: PartialEq + Display + std::str::FromStr + Debug, <T as std::str::FromStr>::Err: Debug {
+    type Message = InputNumberMsg;
+    type Properties = InputNumberProps<T>;
+
+    fn create(ctx: &Context<Self>) -> Self {
+        let value = ctx.props().value.to_string();
+
+        Self {
+            value,
+            initial_value: ctx.props().value
+        }
+    }
+
+    fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
+        match msg {
+            InputNumberMsg::UpdateValue(new_value) => {
+                let new_amount = new_value.parse::<T>();
+                self.value = new_value;
+                match new_amount {
+                    Ok(new_amount) => {
+                        ctx.props().request.emit(new_amount);
+                    },
+                    Err(e) => {
+                        // TODO: handle error better
+                        log::error!("Bad parse {:?}", e);
+                    }
+                }
+                true
+            },
+        }
+    }
+
+    fn view(&self, ctx: &Context<Self>) -> Html {
+        let link = ctx.link();
+        html! {
+            <div class="input-field">
+                <input
+                    type="number"
+                    step={ctx.props().step.clone()}
+                    id={ctx.props().id.clone()}
+                    oninput={link.callback(move |event: InputEvent| {
+                        let input: HtmlInputElement = event.target_unchecked_into();
+                        InputNumberMsg::UpdateValue(input.value())
+                    })}
+                    value={self.value.clone()}
+                />
+                <label for={ctx.props().id.clone()} class="active hide-on-med-and-up">{ctx.props().label.clone()}</label>
             </div>
         }
     }
