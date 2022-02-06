@@ -1,5 +1,5 @@
 use super::event_bus::{EventBus, Request};
-use loan_payoff::{Loan, round_to_currency, round_to_decimals};
+use loan_payoff::{round_to_currency, round_to_decimals, Loan};
 use std::fmt::{Debug, Display};
 use web_sys::{HtmlInputElement, InputEvent};
 use yew::prelude::*;
@@ -38,23 +38,28 @@ impl Component for LoanRow {
             LoanMsg::Delete(index) => {
                 self.event_bus.send(Request::DeleteLoan(index));
                 true
-            },
+            }
             LoanMsg::UpdateInitialValue(new_amount, index) => {
-                self.event_bus.send(Request::UpdateInitialValue(new_amount, index));
+                self.event_bus
+                    .send(Request::UpdateInitialValue(new_amount, index));
                 true
-            },
+            }
             LoanMsg::UpdateInterestRate(new_rate, index) => {
-                self.event_bus.send(Request::UpdateInterestRate(new_rate, index));
+                self.event_bus
+                    .send(Request::UpdateInterestRate(new_rate, index));
                 true
-            },
+            }
             LoanMsg::UpdateName(new_name, index) => {
                 self.event_bus.send(Request::UpdateName(new_name, index));
                 true
-            },
+            }
             LoanMsg::UpdateNumberOfPayments(new_number_of_payments, index) => {
-                self.event_bus.send(Request::UpdateNumberOfPayments(new_number_of_payments, index));
+                self.event_bus.send(Request::UpdateNumberOfPayments(
+                    new_number_of_payments,
+                    index,
+                ));
                 true
-            },
+            }
         }
     }
 
@@ -143,8 +148,10 @@ pub struct InputNumber<T> {
 }
 
 impl<T: Copy + 'static> Component for InputNumber<T>
- where
-     T: PartialEq + Display + std::str::FromStr + Debug, <T as std::str::FromStr>::Err: Debug {
+where
+    T: PartialEq + Display + std::str::FromStr + Debug,
+    <T as std::str::FromStr>::Err: Debug,
+{
     type Message = InputNumberMsg;
     type Properties = InputNumberProps<T>;
 
@@ -153,7 +160,7 @@ impl<T: Copy + 'static> Component for InputNumber<T>
 
         Self {
             value,
-            initial_value: ctx.props().value
+            initial_value: ctx.props().value,
         }
     }
 
@@ -165,14 +172,14 @@ impl<T: Copy + 'static> Component for InputNumber<T>
                 match new_amount {
                     Ok(new_amount) => {
                         ctx.props().request.emit(new_amount);
-                    },
+                    }
                     Err(e) => {
                         // TODO: handle error better
                         log::error!("Bad parse {:?}", e);
                     }
                 }
                 true
-            },
+            }
         }
     }
 

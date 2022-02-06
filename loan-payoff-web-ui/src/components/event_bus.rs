@@ -1,4 +1,4 @@
-use loan_payoff::{Loan, round_to_currency};
+use loan_payoff::{round_to_currency, Loan};
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use yew_agent::{Agent, AgentLink, Context, HandlerId};
@@ -61,44 +61,47 @@ impl Agent for EventBus {
                     initial_value: 10000.00,
                     rate: 0.014,
                     number_of_payments: 48,
-                    payment_amount: 287.52
+                    payment_amount: 287.52,
                 };
                 self.loans.push(loan3);
-            },
+            }
             Request::DeleteLoan(index) => {
                 self.loans.remove(index);
-            },
-            Request::Bump => { /* just responds below */ },
+            }
+            Request::Bump => { /* just responds below */ }
             Request::UpdateInitialValue(new_amount, index) => {
                 self.loans[index].initial_value = new_amount;
-                let calculated_payment_amount = round_to_currency(self.loans[index].calculate_payment_amount());
+                let calculated_payment_amount =
+                    round_to_currency(self.loans[index].calculate_payment_amount());
                 if calculated_payment_amount > 0.0 {
                     self.loans[index].payment_amount = calculated_payment_amount;
                 } else {
                     // TODO: set error flag and mark row as invalid
                 }
-            },
+            }
             Request::UpdateInterestRate(new_rate, index) => {
                 self.loans[index].rate = new_rate;
-                let calculated_payment_amount = round_to_currency(self.loans[index].calculate_payment_amount());
+                let calculated_payment_amount =
+                    round_to_currency(self.loans[index].calculate_payment_amount());
                 if calculated_payment_amount > 0.0 {
                     self.loans[index].payment_amount = calculated_payment_amount;
                 } else {
                     // TODO: set error flag and mark row as invalid
                 }
-            },
+            }
             Request::UpdateName(new_name, index) => {
                 self.loans[index].name = new_name;
-            },
+            }
             Request::UpdateNumberOfPayments(new_number_of_payments, index) => {
                 self.loans[index].number_of_payments = new_number_of_payments;
-                let calculated_payment_amount = round_to_currency(self.loans[index].calculate_payment_amount());
+                let calculated_payment_amount =
+                    round_to_currency(self.loans[index].calculate_payment_amount());
                 if calculated_payment_amount > 0.0 {
                     self.loans[index].payment_amount = calculated_payment_amount;
                 } else {
                     // TODO: set error flag and mark row as invalid
                 }
-            },
+            }
         }
 
         for sub in self.subscribers.iter() {

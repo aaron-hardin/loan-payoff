@@ -1,6 +1,6 @@
 use super::event_bus::{EventBus, Request};
 use crate::components::LoanRow;
-use loan_payoff::{Loan, pay_loans_all_orderings};
+use loan_payoff::{pay_loans_all_orderings, Loan};
 use web_sys::{HtmlInputElement, InputEvent};
 use yew::prelude::*;
 use yew::virtual_dom::VChild;
@@ -57,7 +57,7 @@ impl Component for Loans {
                             optimal_payoff.savings_over_debt_snowball
                         );
                         self.optimal_payoff_display = stra;
-                    },
+                    }
                     Err(e) => {
                         self.optimal_payoff_display = format!("Err {:?}", e);
                     }
@@ -66,16 +66,16 @@ impl Component for Loans {
                 // the value has changed so we need to
                 // re-render for it to appear on the page
                 true
-            },
+            }
             LoansMsg::AddLoan => {
                 self.event_bus.send(Request::AddLoan);
                 true
-            },
+            }
             LoansMsg::UpdateExtraAmount(content) => {
                 // TODO: if empty this throws, need to allow empty but disallow non-numerical
                 self.extra_amount = content.parse::<f64>().unwrap();
                 true
-            },
+            }
             LoansMsg::UpdateLoans(loans) => {
                 self.loans = loans;
                 true
@@ -93,7 +93,8 @@ impl Component for Loans {
                 html_nested! {
                     <LoanRow loan={item.clone()} index={index} />
                 }
-            }).collect();
+            })
+            .collect();
 
         html! {
             <div>
