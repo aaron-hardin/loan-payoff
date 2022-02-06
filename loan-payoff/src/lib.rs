@@ -236,6 +236,10 @@ pub fn round_to_currency(a: f64) -> f64 {
     (a * 100.0).round() / 100.0
 }
 
+pub fn round_to_decimals(a: f64, places: i32) -> f64 {
+    (a * 10.0f64.powi(places)).round() / 10.0f64.powi(places)
+}
+
 #[derive(Debug)]
 pub enum Error {
     LoanGoesToInf,

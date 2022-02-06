@@ -1,5 +1,5 @@
 use super::event_bus::{EventBus, Request};
-use loan_payoff::{Loan, round_to_currency};
+use loan_payoff::{Loan, round_to_currency, round_to_decimals};
 use std::fmt::{Debug, Display};
 use web_sys::{HtmlInputElement, InputEvent};
 use yew::prelude::*;
@@ -91,12 +91,12 @@ impl Component for LoanRow {
                 </div>
                 <div class="col l2 s12">
                     <InputNumber<f64>
-                        value={ctx.props().loan.rate}
-                        step=".001"
+                        value={round_to_decimals(ctx.props().loan.rate * 12.0 * 100.0, 1)}
+                        step=".1"
                         {index}
                         id="loan_interest_rate"
                         label="Interest Rate"
-                        request={link.callback(move |new_val: f64| LoanMsg::UpdateInterestRate(new_val, index))}
+                        request={link.callback(move |new_val: f64| LoanMsg::UpdateInterestRate(new_val/12.0/100.0, index))}
                     />
                 </div>
                 <div class="col l2 s12">
