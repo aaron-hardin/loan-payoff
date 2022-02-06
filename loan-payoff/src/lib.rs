@@ -173,7 +173,6 @@ pub fn pay_loans(loans: &Vec<&Loan>, extra_amount: f64, ordering: &[usize]) -> R
         expected_costs[i] = round_to_currency(loans[i].payment_amount * loans[i].number_of_payments as f64);
     }
 
-    let mut print_debug = false;
     let mut count = 0;
     let original_extra_amount = extra_amount;
     while ordering.iter().any(|&i| remaining_amounts[i] > 0.0 && !approx_equal(remaining_amounts[i], 0.0, DEFAULT_ROUNDING_PLACES)) {
@@ -192,13 +191,13 @@ pub fn pay_loans(loans: &Vec<&Loan>, extra_amount: f64, ordering: &[usize]) -> R
             if remaining_amounts[ix] > 0.0 && !approx_equal(remaining_amounts[ix], 0.0, DEFAULT_ROUNDING_PLACES) {
                 let amount_to_pay = loans[ix].payment_amount + extra_amount_this_period;
 
-                if print_debug { log::debug!("BEFORE {}: {}, remaining={}", count, loans[ix], remaining_amounts[ix]); }
+                log::trace!("BEFORE {}: {}, remaining={}", count, loans[ix], remaining_amounts[ix]);
                 let (amount_paid_this_period, remaining_amount) = loans[ix].pay_loan(remaining_amounts[ix], amount_to_pay);
-                if print_debug { log::debug!("AFTER {}: {}, remaining={}", count, loans[ix], remaining_amount); }
+                log::trace!("AFTER {}: {}, remaining={}", count, loans[ix], remaining_amount);
 
                 remaining_amounts[ix] = remaining_amount;
                 extra_amount_this_period = amount_paid_this_period - amount_to_pay;
-                if print_debug { log::debug!("paying {} .. count={}", amount_paid_this_period, count); }
+                log::trace!("paying {} .. count={}", amount_paid_this_period, count);
                 actual_costs[ix] = round_to_currency(actual_costs[ix] + amount_paid_this_period);
 
                 // If the loan goes to 0 after paying, add the monthly payment to extra_amount (after paying all loans)
