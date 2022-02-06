@@ -5,24 +5,24 @@ fn main() {
 
     let loan1 = Loan::new(
         "num1".to_owned(),
-        12000.00,
-        0.006,
-        48,
-        288.47
+        10000.00,
+        27.6 / 12.0 / 100.0,
+        23,
+        564.74
     );
     let loan2 = Loan::new(
         "num2".to_owned(),
-        11000.00,
-        0.00625,
+        10000.00,
+        7.5 / 12.0 / 100.0,
         48,
-        265.97
+        241.79
     );
     let loan3 = Loan::new(
         /*name:*/ "num3".to_owned(),
-        /*initial_value:*/ 10000.00,
-        /*rate:*/ 0.014,
+        /*initial_value:*/ 13000.00,
+        /*rate:*/ 16.8 / 12.0 / 100.0,
         /*number_of_payments:*/ 48,
-        /*payment_amount:*/ 287.52
+        /*payment_amount:*/ 373.77
     );
 
     let extra_amount = 100.0;
