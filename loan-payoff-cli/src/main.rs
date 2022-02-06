@@ -1,6 +1,8 @@
 use loan_payoff::{Loan, pay_loans_all_orderings};
 
 fn main() {
+    simple_logger::init_with_level(log::Level::Info).unwrap();
+
     let loan1 = Loan::new(
         "num1".to_owned(),
         12000.00,

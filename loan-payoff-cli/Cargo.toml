@@ -7,3 +7,5 @@ edition = "2021"
 
 [dependencies]
 loan-payoff = { path = "../loan-payoff" }
+log = "0.4.6"
+simple_logger = "2.1.0"
