@@ -14,6 +14,8 @@ pub struct Loan {
 pub struct OptimalPayoff {
     pub ordering: Vec<usize>,
     pub savings: f64,
+    pub is_debt_snowball: bool,
+    pub savings_over_debt_snowball: f64,
 }
 
 const DEFAULT_ROUNDING_PLACES: u8 = 4;
@@ -79,11 +81,17 @@ pub fn pay_loans_all_orderings(loans: &Vec<&Loan>, extra_amount: f64) -> Result<
     // initial ordering
     let mut best_savings = -1.0;
     let mut best_ordering = Vec::new();
+    let mut best_debt_snowball_savings = -1.0; // Note: there can be multiple debt snowball (2 loans with same amount)
+    let mut is_snowball_best = false;
     match pay_loans(&loans, extra_amount, &ordering) {
-        Ok((_is_debt_snowball, _actual_costs_total, savings_total)) => {
+        Ok((is_debt_snowball, _actual_costs_total, savings_total)) => {
             if savings_total > best_savings {
                 best_savings = savings_total;
                 best_ordering = ordering.clone();
+                is_snowball_best = is_debt_snowball;
+            }
+            if is_debt_snowball && savings_total > best_debt_snowball_savings {
+                best_debt_snowball_savings = savings_total;
             }
         },
         Err(Error::LoanGoesToInf) => { /* noop: if no loan orderings converge then we return this error below */ },
@@ -100,10 +108,14 @@ pub fn pay_loans_all_orderings(loans: &Vec<&Loan>, extra_amount: f64) -> Result<
         ordering.swap(j, i);
 
         match pay_loans(&loans, extra_amount, &ordering) {
-            Ok((_is_debt_snowball, _actual_costs_total, savings_total)) => {
+            Ok((is_debt_snowball, _actual_costs_total, savings_total)) => {
                 if savings_total > best_savings {
                     best_savings = savings_total;
                     best_ordering = ordering.clone();
+                    is_snowball_best = is_debt_snowball;
+                }
+                if is_debt_snowball && savings_total > best_debt_snowball_savings {
+                    best_debt_snowball_savings = savings_total;
                 }
             },
             Err(Error::LoanGoesToInf) => { /* noop: if no loan orderings converge then we return this error below */ },
@@ -124,6 +136,8 @@ pub fn pay_loans_all_orderings(loans: &Vec<&Loan>, extra_amount: f64) -> Result<
     Ok(OptimalPayoff {
         ordering: best_ordering,
         savings: best_savings,
+        is_debt_snowball: is_snowball_best,
+        savings_over_debt_snowball: round_to_currency(best_savings - best_debt_snowball_savings),
     })
 }
 
@@ -214,6 +228,7 @@ pub fn pay_loans(loans: &Vec<&Loan>, extra_amount: f64, ordering: &[usize]) -> R
     println!("EXPECTED=${}", round_to_currency(expected_costs_total));
     println!("ACTUAL=${}", actual_costs_total);
     println!("By paying an extra ${}, you saved ${}", original_extra_amount, savings_total);
+    println!("Is debt snowball {}", is_debt_snowball);
     println!("Total periods={}", count);
 
     log::info!("Pay loans with ordering {:?}, total amount {}, savings {}", ordering, actual_costs_total, savings_total);

@@ -28,8 +28,10 @@ fn main() {
     let optimal_payoff = pay_loans_all_orderings(&loans, extra_amount).expect("Failed to pay loans");
 
     println!(
-        "Best ordering = {}, with savings ${}",
+        "Best ordering = {}, with savings ${}, is debt snowball {}, savings over debt snowball ${}",
         optimal_payoff.ordering.iter().map(|&i| loans[i].name.clone()).collect::<Vec<String>>().join(" -> "),
-        optimal_payoff.savings
+        optimal_payoff.savings,
+        optimal_payoff.is_debt_snowball,
+        optimal_payoff.savings_over_debt_snowball
     );
 }

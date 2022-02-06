@@ -50,9 +50,11 @@ impl Component for Loans {
                 match pay_loans_all_orderings(&loans, self.extra_amount) {
                     Ok(optimal_payoff) => {
                         let stra = format!(
-                            "Best ordering = {}, with savings ${}",
+                            "Best ordering = {}, with savings ${}, is debt snowball {}, savings over debt snowball ${}",
                             optimal_payoff.ordering.iter().map(|&i| loans[i].name.clone()).collect::<Vec<String>>().join(" -> "),
-                            optimal_payoff.savings
+                            optimal_payoff.savings,
+                            optimal_payoff.is_debt_snowball,
+                            optimal_payoff.savings_over_debt_snowball
                         );
                         self.optimal_payoff_display = stra;
                     },
