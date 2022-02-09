@@ -51,7 +51,7 @@ impl Component for Loans {
                     Ok(optimal_payoff) => {
                         let stra = format!(
                             "Best ordering = {}, with savings ${}, is debt snowball {}, savings over debt snowball ${}",
-                            optimal_payoff.ordering.iter().map(|&i| loans[i].name.clone()).collect::<Vec<String>>().join(" -> "),
+                            optimal_payoff.ordering.iter().map(|&i| loans[i].name.as_ref()).collect::<Vec<_>>().join(" -> "),
                             optimal_payoff.savings,
                             optimal_payoff.is_debt_snowball,
                             optimal_payoff.savings_over_debt_snowball
@@ -106,7 +106,7 @@ impl Component for Loans {
                             let input: HtmlInputElement = event.target_unchecked_into();
                             LoansMsg::UpdateExtraAmount(input.value())
                         })}
-                        value={self.extra_amount.clone().to_string()}
+                        value={self.extra_amount.to_string()}
                     />
                     <label for="extra_payment" class="active">{ "Extra Payment" }</label>
                 </div>

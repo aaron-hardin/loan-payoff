@@ -23,8 +23,8 @@ fn main() {
         optimal_payoff
             .ordering
             .iter()
-            .map(|&i| loans[i].name.clone())
-            .collect::<Vec<String>>()
+            .map(|&i| loans[i].name.as_ref())
+            .collect::<Vec<_>>()
             .join(" -> "),
         optimal_payoff.savings,
         optimal_payoff.is_debt_snowball,

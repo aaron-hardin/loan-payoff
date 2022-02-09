@@ -271,8 +271,8 @@ pub fn pay_loans(
         "{}",
         ordering
             .iter()
-            .map(|&i| loans[i].name.clone())
-            .collect::<Vec<String>>()
+            .map(|&i| loans[i].name.as_ref())
+            .collect::<Vec<_>>()
             .join(" -> ")
     );
 
