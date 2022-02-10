@@ -8,7 +8,6 @@ pub struct Loan {
 	pub rate: f64,
 	pub number_of_payments: i64,
 	pub payment_amount: f64,
-	//pub present_value: f64,
 }
 
 pub struct OptimalPayoff {
@@ -34,7 +33,6 @@ impl Loan {
 			rate,
 			number_of_payments,
 			payment_amount,
-			//present_value: initial_value
 		}
 	}
 
@@ -44,15 +42,8 @@ impl Loan {
 			/ (f64::powf(1.0 + self.rate, self.number_of_payments as f64) - 1.0)
 	}
 
-	// pub fn reset(&mut self) -> f64 {
-	//     self.present_value = self.initial_value;
-	//     self.present_value
-	// }
-
 	// Returns the amount paid, remaining_amount
 	pub fn pay_loan(&self, present_value: f64, payment_amount: f64) -> (f64, f64) {
-		//let mut payment_amount = round_to_currency(loan.calculate_payment_amount());
-		//let calculated_payment_amount = payment_amount;
 		if approx_equal(payment_amount, 0.0, DEFAULT_ROUNDING_PLACES) {
 			println!("ERR: paying {}", payment_amount);
 			return (0.0, 0.0);
@@ -60,7 +51,6 @@ impl Loan {
 
 		let mut present_value = present_value;
 		let interest = round_to_currency(present_value * self.rate);
-		//println!("interest={}", interest);
 		present_value += interest;
 		let mut payment_amount_this_period = payment_amount;
 		if payment_amount_this_period > present_value {
