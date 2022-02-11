@@ -1,0 +1,4 @@
+name,initial_value,rate,number_of_payments,payment_amount
+num1,10000.00,0.023,23,564.74
+num2,10000.00,0.00625,48,241.79
+num3,13000.00,0.014,48,373.77
