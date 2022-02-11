@@ -1,4 +1,4 @@
-use loan_payoff::{pay_loans_all_orderings, Loan};
+use loan_payoff::{pay_loans_all_orderings, round_to_currency, Loan};
 use log;
 use std::env;
 use std::error::Error;
@@ -27,7 +27,7 @@ fn main() {
 				log::error!("could not parse entered value '{}' to f64", extra_amount);
 				process::exit(1);
 			}
-			Ok(extra_amount) => extra_amount,
+			Ok(extra_amount) => round_to_currency(extra_amount),
 		},
 	};
 
