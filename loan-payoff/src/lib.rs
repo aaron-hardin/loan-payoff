@@ -2,7 +2,7 @@ use log;
 use serde::Deserialize;
 use std::fmt;
 
-#[derive(Clone, PartialEq, Deserialize)]
+#[derive(Clone, PartialEq, Deserialize, Default)]
 pub struct Loan {
 	pub name: String,
 	pub initial_value: f64,

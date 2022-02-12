@@ -56,14 +56,10 @@ impl Agent for EventBus {
 	fn handle_input(&mut self, msg: Self::Input, _id: HandlerId) {
 		match msg {
 			Request::AddLoan => {
-				let loan3 = Loan {
-					name: "num3".to_owned(),
-					initial_value: 10000.00,
-					rate: 0.014,
-					number_of_payments: 48,
-					payment_amount: 287.52,
+				let new_loan = Loan {
+					..Default::default()
 				};
-				self.loans.push(loan3);
+				self.loans.push(new_loan);
 			}
 			Request::DeleteLoan(index) => {
 				self.loans.remove(index);
