@@ -68,6 +68,12 @@ impl Component for LoanRow {
 		let mut calculated_payment_amount = ctx.props().loan.calculate_payment_amount();
 		calculated_payment_amount = round_to_currency(calculated_payment_amount);
 		let index = ctx.props().index;
+		let input_class =
+			if calculated_payment_amount.is_nan() || calculated_payment_amount.is_infinite() {
+				"invalid".clone()
+			} else {
+				"".clone()
+			};
 
 		html! {
 			<div class="row">
@@ -76,6 +82,7 @@ impl Component for LoanRow {
 						<input
 							type="text"
 							id="loan_name"
+							class={if ctx.props().loan.name.is_empty() { "invalid".clone() } else { "".clone() }}
 							oninput={link.callback(move |event: InputEvent| {
 								let input: HtmlInputElement = event.target_unchecked_into();
 								LoanMsg::UpdateName(input.value(), index)
@@ -89,6 +96,7 @@ impl Component for LoanRow {
 					<InputNumber<f64>
 						value={ctx.props().loan.initial_value}
 						{index}
+						{input_class}
 						id="loan_initial_value"
 						label="Loan Amount"
 						request={link.callback(move |new_val: f64| LoanMsg::UpdateInitialValue(new_val, index))}
@@ -99,6 +107,7 @@ impl Component for LoanRow {
 						value={round_to_decimals(ctx.props().loan.rate * 12.0 * 100.0, 1)}
 						step=".1"
 						{index}
+						{input_class}
 						id="loan_interest_rate"
 						label="Interest Rate"
 						request={link.callback(move |new_val: f64| LoanMsg::UpdateInterestRate(new_val/12.0/100.0, index))}
@@ -108,6 +117,7 @@ impl Component for LoanRow {
 					<InputNumber<i64>
 						value={ctx.props().loan.number_of_payments}
 						{index}
+						{input_class}
 						id="loan_number_of_payments"
 						label="Number of Payments"
 						request={link.callback(move |new_val: i64| LoanMsg::UpdateNumberOfPayments(new_val, index))}
@@ -140,6 +150,8 @@ pub struct InputNumberProps<T: PartialEq> {
 	pub label: String,
 	#[prop_or("1".to_owned())]
 	pub step: String,
+	#[prop_or("".to_owned())]
+	pub input_class: String,
 }
 
 pub struct InputNumber<T> {
@@ -190,6 +202,7 @@ where
 				<input
 					type="number"
 					step={ctx.props().step.clone()}
+					class={ctx.props().input_class.clone()}
 					id={ctx.props().id.clone()}
 					oninput={link.callback(move |event: InputEvent| {
 						let input: HtmlInputElement = event.target_unchecked_into();
