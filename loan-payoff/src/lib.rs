@@ -170,7 +170,8 @@ pub fn pay_loans(
 			loans[i].payment_amount,
 			DEFAULT_ROUNDING_PLACES,
 		) {
-			panic!("warning for loan '{}': calculated loan payment amount {} is not the same as given amount {}", loans[i].name, payment_amount, loans[i].payment_amount);
+			log::error!("warning for loan '{}': calculated loan payment amount {} is not the same as given amount {}", loans[i].name, payment_amount, loans[i].payment_amount);
+			return Err(Error::InvalidLoan(i));
 		}
 
 		if max_cost > loans[i].initial_value {
@@ -315,4 +316,5 @@ pub fn round_to_decimals(a: f64, places: i32) -> f64 {
 pub enum Error {
 	LoanGoesToInf,
 	OtherError(String),
+	InvalidLoan(usize),
 }
