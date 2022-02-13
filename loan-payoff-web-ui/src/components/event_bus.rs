@@ -37,34 +37,30 @@ impl Agent for EventBus {
 			loans: Vec::new(),
 		};
 
-		me.loans.push(
-			LoanViewModel {
-				loan: Loan {
-					name: "eek".to_owned(),
-					initial_value: 1000.00,
-					rate: 0.023,
-					number_of_payments: 23,
-					// TODO: test with bad values
-					payment_amount: 56.47,
-				},
-				key: me.current_key
-			}
-		);
+		me.loans.push(LoanViewModel {
+			loan: Loan {
+				name: "eek".to_owned(),
+				initial_value: 1000.00,
+				rate: 0.023,
+				number_of_payments: 23,
+				// TODO: test with bad values
+				payment_amount: 56.47,
+			},
+			key: me.current_key,
+		});
 		me.current_key += 1;
 
-		me.loans.push(
-			LoanViewModel {
-				loan: Loan {
-					name: "num2".to_owned(),
-					initial_value: 10000.00,
-					rate: 0.00625,
-					number_of_payments: 48,
-					// TODO: test with bad values: payment_amount: 234.43
-					payment_amount: 241.79,
-				},
-				key: me.current_key
-			}
-		);
+		me.loans.push(LoanViewModel {
+			loan: Loan {
+				name: "num2".to_owned(),
+				initial_value: 10000.00,
+				rate: 0.00625,
+				number_of_payments: 48,
+				// TODO: test with bad values: payment_amount: 234.43
+				payment_amount: 241.79,
+			},
+			key: me.current_key,
+		});
 		me.current_key += 1;
 
 		me
@@ -80,7 +76,7 @@ impl Agent for EventBus {
 						name: "l3".to_owned(),
 						..Default::default()
 					},
-					key: self.current_key
+					key: self.current_key,
 				};
 				self.current_key += 1;
 				self.loans.push(new_loan);
