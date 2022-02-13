@@ -10,11 +10,17 @@ pub enum LoansMsg {
 	AddLoan,
 	Calculate,
 	UpdateExtraAmount(String),
-	UpdateLoans(Vec<Loan>),
+	UpdateLoans(Vec<LoanViewModel>),
+}
+
+#[derive(Clone)]
+pub struct LoanViewModel {
+	pub key: i64, // Unique id to use as a key
+	pub loan: Loan,
 }
 
 pub struct Loans {
-	loans: Vec<Loan>,
+	loans: Vec<LoanViewModel>,
 	extra_amount: f64,
 	optimal_payoff_display: String,
 	event_bus: Dispatcher<EventBus>,
@@ -45,7 +51,7 @@ impl Component for Loans {
 				// TODO: self.optimal_payoff_display = "".to_owned(), then continue
 				let mut loans = Vec::new();
 				for loan in self.loans.iter() {
-					loans.push(loan);
+					loans.push(&loan.loan);
 				}
 				match pay_loans_all_orderings(&loans, self.extra_amount) {
 					Ok(optimal_payoff) => {
@@ -91,7 +97,7 @@ impl Component for Loans {
 			.enumerate()
 			.map(|(index, item)| {
 				html_nested! {
-					<LoanRow loan={item.clone()} index={index} />
+					<LoanRow key={item.key} loan={item.loan.clone()} index={index} />
 				}
 			})
 			.collect();
