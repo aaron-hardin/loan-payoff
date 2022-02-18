@@ -51,13 +51,11 @@ impl Component for Loans {
 		match msg {
 			LoansMsg::Calculate => {
 				for loan in self.loans.iter() {
-					if loan.loan.payment_amount.is_nan() || loan.loan.payment_amount.is_infinite()
-					{
+					if loan.loan.payment_amount.is_nan() || loan.loan.payment_amount.is_infinite() {
 						self.show_validation_errors = true;
 						return true;
 					}
-					if loan.loan.name.is_empty()
-					{
+					if loan.loan.name.is_empty() {
 						self.show_validation_errors = true;
 						return true;
 					}
