@@ -25,6 +25,7 @@ pub struct Loans {
 	optimal_payoff_display: String,
 	event_bus: Dispatcher<EventBus>,
 	_producer: Box<dyn Bridge<EventBus>>,
+	show_validation_errors: bool,
 }
 
 impl Component for Loans {
@@ -39,6 +40,7 @@ impl Component for Loans {
 			optimal_payoff_display: "".to_owned(),
 			event_bus: EventBus::dispatcher(),
 			_producer: EventBus::bridge(ctx.link().callback(LoansMsg::UpdateLoans)),
+			show_validation_errors: false,
 		};
 
 		me.event_bus.send(Request::Bump);
@@ -48,6 +50,19 @@ impl Component for Loans {
 	fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
 		match msg {
 			LoansMsg::Calculate => {
+				for loan in self.loans.iter() {
+					if loan.loan.payment_amount.is_nan() || loan.loan.payment_amount.is_infinite()
+					{
+						self.show_validation_errors = true;
+						return true;
+					}
+					if loan.loan.name.is_empty()
+					{
+						self.show_validation_errors = true;
+						return true;
+					}
+				}
+
 				// TODO: self.optimal_payoff_display = "".to_owned(), then continue
 				let mut loans = Vec::new();
 				for loan in self.loans.iter() {
@@ -55,6 +70,7 @@ impl Component for Loans {
 				}
 				match pay_loans_all_orderings(&loans, self.extra_amount) {
 					Ok(optimal_payoff) => {
+						self.show_validation_errors = false;
 						let stra = format!(
 							"Best ordering = {}, with savings ${}, is debt snowball {}, savings over debt snowball ${}",
 							optimal_payoff.ordering.iter().map(|&i| loans[i].name.as_ref()).collect::<Vec<_>>().join(" -> "),
@@ -97,7 +113,7 @@ impl Component for Loans {
 			.enumerate()
 			.map(|(index, item)| {
 				html_nested! {
-					<LoanRow key={item.key} loan={item.loan.clone()} index={index} />
+					<LoanRow key={item.key} loan={item.loan.clone()} index={index} show_validation_errors={self.show_validation_errors} />
 				}
 			})
 			.collect();

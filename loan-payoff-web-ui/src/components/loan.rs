@@ -21,6 +21,7 @@ pub struct LoanRow {
 pub struct LoanProps {
 	pub loan: Loan,
 	pub index: usize,
+	pub show_validation_errors: bool,
 }
 
 impl Component for LoanRow {
@@ -68,12 +69,19 @@ impl Component for LoanRow {
 		let mut calculated_payment_amount = ctx.props().loan.calculate_payment_amount();
 		calculated_payment_amount = round_to_currency(calculated_payment_amount);
 		let index = ctx.props().index;
-		let input_class =
-			if calculated_payment_amount.is_nan() || calculated_payment_amount.is_infinite() {
-				"invalid".clone()
-			} else {
-				"".clone()
-			};
+		let show_validation_errors = ctx.props().show_validation_errors;
+		let input_class = if show_validation_errors
+			&& (calculated_payment_amount.is_nan() || calculated_payment_amount.is_infinite())
+		{
+			"invalid".clone()
+		} else {
+			"".clone()
+		};
+		let name_class = if show_validation_errors && ctx.props().loan.name.is_empty() {
+			"invalid".clone()
+		} else {
+			"".clone()
+		};
 
 		html! {
 			<div class="row">
@@ -82,7 +90,7 @@ impl Component for LoanRow {
 						<input
 							type="text"
 							id="loan_name"
-							class={if ctx.props().loan.name.is_empty() { "invalid".clone() } else { "".clone() }}
+							class={name_class}
 							oninput={link.callback(move |event: InputEvent| {
 								let input: HtmlInputElement = event.target_unchecked_into();
 								LoanMsg::UpdateName(input.value(), index)
