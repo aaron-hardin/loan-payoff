@@ -73,7 +73,6 @@ impl Agent for EventBus {
 			Request::AddLoan => {
 				let new_loan = LoanViewModel {
 					loan: Loan {
-						name: "l3".to_owned(),
 						..Default::default()
 					},
 					key: self.current_key,
