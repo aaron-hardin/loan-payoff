@@ -12,4 +12,3 @@ The CLI takes two arguments: file path, and extra payment amount (optional, defa
 
 # TODO
 - Add unit tests (github ci should run them)
-- Remove pre-filled loans (should all be user entered)
