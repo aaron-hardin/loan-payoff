@@ -1,6 +1,6 @@
 use super::event_bus::{EventBus, Request};
 use crate::components::LoanRow;
-use loan_payoff::{pay_loans_all_orderings, Loan};
+use loan_payoff::{self, Loan};
 use web_sys::{HtmlInputElement, InputEvent};
 use yew::prelude::*;
 use yew::virtual_dom::VChild;
@@ -66,7 +66,7 @@ impl Component for Loans {
 				for loan in self.loans.iter() {
 					loans.push(&loan.loan);
 				}
-				match pay_loans_all_orderings(&loans, self.extra_amount) {
+				match loan_payoff::pay_loans_all_orderings(&loans, self.extra_amount) {
 					Ok(optimal_payoff) => {
 						self.show_validation_errors = false;
 						let stra = format!(

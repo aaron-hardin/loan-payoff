@@ -1,4 +1,4 @@
-use loan_payoff::{pay_loans_all_orderings, round_to_currency, Loan};
+use loan_payoff::{self, Loan};
 use log;
 use std::env;
 use std::error::Error;
@@ -27,7 +27,7 @@ fn main() {
 				log::error!("could not parse entered value '{}' to f64", extra_amount);
 				process::exit(1);
 			}
-			Ok(extra_amount) => round_to_currency(extra_amount),
+			Ok(extra_amount) => loan_payoff::round_to_currency(extra_amount),
 		},
 	};
 
@@ -47,8 +47,9 @@ fn process_loans(file_path: OsString, extra_amount: f64) -> Result<(), Box<dyn E
 		loans.push(loan);
 	}
 
-	let optimal_payoff = pay_loans_all_orderings(&loans.iter().map(|l| l).collect(), extra_amount)
-		.expect("Failed to pay loans");
+	let optimal_payoff =
+		loan_payoff::pay_loans_all_orderings(&loans.iter().map(|l| l).collect(), extra_amount)
+			.expect("Failed to pay loans");
 
 	println!(
 		"Best ordering = {}, with savings ${}, is debt snowball {}, savings over debt snowball ${}",

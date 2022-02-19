@@ -1,4 +1,4 @@
-use loan_payoff::{round_to_currency, Loan};
+use loan_payoff::{self, Loan};
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use yew_agent::{Agent, AgentLink, Context, HandlerId};
@@ -58,8 +58,9 @@ impl Agent for EventBus {
 			Request::Bump => { /* just responds below */ }
 			Request::UpdateInitialValue(new_amount, index) => {
 				self.loans[index].loan.initial_value = new_amount;
-				let calculated_payment_amount =
-					round_to_currency(self.loans[index].loan.calculate_payment_amount());
+				let calculated_payment_amount = loan_payoff::round_to_currency(
+					self.loans[index].loan.calculate_payment_amount(),
+				);
 				if calculated_payment_amount > 0.0 {
 					self.loans[index].loan.payment_amount = calculated_payment_amount;
 				} else {
@@ -68,8 +69,9 @@ impl Agent for EventBus {
 			}
 			Request::UpdateInterestRate(new_rate, index) => {
 				self.loans[index].loan.rate = new_rate;
-				let calculated_payment_amount =
-					round_to_currency(self.loans[index].loan.calculate_payment_amount());
+				let calculated_payment_amount = loan_payoff::round_to_currency(
+					self.loans[index].loan.calculate_payment_amount(),
+				);
 				if calculated_payment_amount > 0.0 {
 					self.loans[index].loan.payment_amount = calculated_payment_amount;
 				} else {
@@ -81,8 +83,9 @@ impl Agent for EventBus {
 			}
 			Request::UpdateNumberOfPayments(new_number_of_payments, index) => {
 				self.loans[index].loan.number_of_payments = new_number_of_payments;
-				let calculated_payment_amount =
-					round_to_currency(self.loans[index].loan.calculate_payment_amount());
+				let calculated_payment_amount = loan_payoff::round_to_currency(
+					self.loans[index].loan.calculate_payment_amount(),
+				);
 				if calculated_payment_amount > 0.0 {
 					self.loans[index].loan.payment_amount = calculated_payment_amount;
 				} else {

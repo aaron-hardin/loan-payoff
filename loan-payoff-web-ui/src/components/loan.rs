@@ -1,5 +1,5 @@
 use super::event_bus::{EventBus, Request};
-use loan_payoff::{round_to_currency, round_to_decimals, Loan};
+use loan_payoff::{self, Loan};
 use std::fmt::{Debug, Display};
 use web_sys::{HtmlInputElement, InputEvent};
 use yew::prelude::*;
@@ -67,7 +67,7 @@ impl Component for LoanRow {
 	fn view(&self, ctx: &Context<Self>) -> Html {
 		let link = ctx.link();
 		let mut calculated_payment_amount = ctx.props().loan.calculate_payment_amount();
-		calculated_payment_amount = round_to_currency(calculated_payment_amount);
+		calculated_payment_amount = loan_payoff::round_to_currency(calculated_payment_amount);
 		let index = ctx.props().index;
 		let show_validation_errors = ctx.props().show_validation_errors;
 		let input_class = if show_validation_errors
@@ -112,7 +112,7 @@ impl Component for LoanRow {
 				</div>
 				<div class="col l2 s12">
 					<InputNumber<f64>
-						value={round_to_decimals(ctx.props().loan.rate * 12.0 * 100.0, 1)}
+						value={loan_payoff::round_to_decimals(ctx.props().loan.rate * 12.0 * 100.0, 1)}
 						step=".1"
 						{index}
 						{input_class}
