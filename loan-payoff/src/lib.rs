@@ -299,9 +299,11 @@ impl fmt::Display for Loan {
 	}
 }
 
-pub fn approx_equal(a: f64, b: f64, decimal_places: u8) -> bool {
-	let p = 10.0f64.powi(-(decimal_places as i32));
-	(a - b).abs() < p
+fn approx_equal(a: f64, b: f64, decimal_places: u8) -> bool {
+	let factor = 10.0f64.powi(decimal_places as i32);
+	let a = (a * factor).trunc();
+	let b = (b * factor).trunc();
+	a == b
 }
 
 pub fn round_to_currency(a: f64) -> f64 {
