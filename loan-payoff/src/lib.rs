@@ -165,12 +165,11 @@ pub fn pay_loans(
 
 	for &i in ordering.iter() {
 		let payment_amount = round_to_currency(loans[i].calculate_payment_amount());
-		if !approx_equal(
+		if !within_five_cents(
 			payment_amount,
-			loans[i].payment_amount,
-			DEFAULT_ROUNDING_PLACES,
+			loans[i].payment_amount
 		) {
-			log::error!("warning for loan '{}': calculated loan payment amount {} is not the same as given amount {}", loans[i].name, payment_amount, loans[i].payment_amount);
+			log::error!("loan '{}': calculated loan payment amount {} is not within 5 cents of given amount {}", loans[i].name, payment_amount, loans[i].payment_amount);
 			return Err(Error::InvalidLoan(i));
 		}
 
@@ -299,6 +298,10 @@ impl fmt::Display for Loan {
 	}
 }
 
+fn within_five_cents(a: f64, b: f64) -> bool {
+	(a - b).abs() <= 0.05
+}
+
 fn approx_equal(a: f64, b: f64, decimal_places: u8) -> bool {
 	let factor = 10.0f64.powi(decimal_places as i32);
 	let a = (a * factor).round();
@@ -353,8 +356,9 @@ mod tests {
 		super::round_to_currency(a)
 	}
 
-	#[test_case(10000.00, 0.00625, 48, 241.79)]
-	#[test_case(12000.00, 0.01083, 36, 404.33)]
+	#[test_case(10000.00, 0.00625, 48, 241.79)] // 7.5% annual
+	#[test_case(12000.00, 0.01083, 36, 404.33)] // 13% annual
+	#[test_case(12000.00, 0.02083, 36, 477.12)] // 25% annual
 	fn calculate_payment_amount(i: f64, r: f64, n: i64, expected: f64) {
 		let loan = Loan {
 			initial_value: i,
@@ -366,7 +370,7 @@ mod tests {
 
 		let calculated = super::round_to_currency(loan.calculate_payment_amount());
 		assert!(
-			(expected - calculated).abs() <= 0.05,
+			super::within_five_cents(expected, calculated),
 			"Expected {} to be within 5 cents of {}",
 			calculated,
 			expected
