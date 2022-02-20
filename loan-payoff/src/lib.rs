@@ -165,10 +165,7 @@ pub fn pay_loans(
 
 	for &i in ordering.iter() {
 		let payment_amount = round_to_currency(loans[i].calculate_payment_amount());
-		if !within_five_cents(
-			payment_amount,
-			loans[i].payment_amount
-		) {
+		if !within_five_cents(payment_amount, loans[i].payment_amount) {
 			log::error!("loan '{}': calculated loan payment amount {} is not within 5 cents of given amount {}", loans[i].name, payment_amount, loans[i].payment_amount);
 			return Err(Error::InvalidLoan(i));
 		}

@@ -22,7 +22,8 @@ fn basic_payoff() -> Result<(), loan_payoff::Error> {
 	for i in 0..ordering.len() {
 		ordering[i] = i
 	}
-	let (is_debt_snowball, actual_costs_total, savings_total) = loan_payoff::pay_loans(&loans, extra_amount, &ordering)?;
+	let (is_debt_snowball, actual_costs_total, savings_total) =
+		loan_payoff::pay_loans(&loans, extra_amount, &ordering)?;
 
 	assert!(is_debt_snowball);
 	assert!(actual_costs_total == 28244.9);
