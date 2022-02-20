@@ -9,6 +9,3 @@ This application is intended as a fun project and makes a lot of assumptions abo
 # CLI
 
 The CLI takes two arguments: file path, and extra payment amount (optional, default: 100.00)
-
-# TODO
-- Add unit tests (github ci should run them)

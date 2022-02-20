@@ -29,6 +29,9 @@ jobs:
       - name: Check code formatting
         run: cargo fmt --all -- --check
 
+      - name: Run Cargo Test
+        run: cargo test
+
       - name: Build project
         run: cd loan-payoff-web-ui && trunk build --public-url loan-payoff --release
 
