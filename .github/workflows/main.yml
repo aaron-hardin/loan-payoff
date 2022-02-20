@@ -26,6 +26,9 @@ jobs:
       - name: Add web target
         run: rustup target add wasm32-unknown-unknown
 
+      - name: Check code formatting
+        run: cargo fmt --all -- --check
+
       - name: Build project
         run: cd loan-payoff-web-ui && trunk build --public-url loan-payoff --release
 
