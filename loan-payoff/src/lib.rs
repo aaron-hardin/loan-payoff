@@ -301,8 +301,8 @@ impl fmt::Display for Loan {
 
 fn approx_equal(a: f64, b: f64, decimal_places: u8) -> bool {
 	let factor = 10.0f64.powi(decimal_places as i32);
-	let a = (a * factor).trunc();
-	let b = (b * factor).trunc();
+	let a = (a * factor).round();
+	let b = (b * factor).round();
 	a == b
 }
 
@@ -332,6 +332,7 @@ mod tests {
 	#[test_case(4.001, 4.002, 2 => true)]
 	#[test_case(4.001, 4.002, 3 => false)]
 	#[test_case(4.001, 4.002, 4 => false)]
+	#[test_case(241.79, 241.789, 2 => true)]
 	fn approx_equal(a: f64, b: f64, decimal_places: u8) -> bool {
 		super::approx_equal(a, b, decimal_places)
 	}
