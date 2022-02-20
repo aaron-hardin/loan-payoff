@@ -318,3 +318,19 @@ pub enum Error {
 	OtherError(String),
 	InvalidLoan(usize),
 }
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+	use test_case::test_case;
+
+	#[test_case(4.0, 4.0, 0 => true)]
+	#[test_case(4.001, 4.002, 0 => true)]
+	#[test_case(4.001, 4.002, 1 => true)]
+	#[test_case(4.001, 4.002, 2 => true)]
+	#[test_case(4.001, 4.002, 3 => false)]
+	#[test_case(4.001, 4.002, 4 => false)]
+	fn approx_equal(a: f64, b: f64, decimal_places: u8) -> bool {
+		super::approx_equal(a, b, decimal_places)
+	}
+}
