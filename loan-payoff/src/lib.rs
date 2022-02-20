@@ -352,4 +352,24 @@ mod tests {
 	fn round_to_currency(a: f64) -> f64 {
 		super::round_to_currency(a)
 	}
+
+	#[test_case(10000.00, 0.00625, 48, 241.79)]
+	#[test_case(12000.00, 0.01083, 36, 404.33)]
+	fn calculate_payment_amount(i: f64, r: f64, n: i64, expected: f64) {
+		let loan = Loan {
+			initial_value: i,
+			rate: r,
+			number_of_payments: n,
+			payment_amount: 0.0, // value doesn't matter
+			name: "".to_owned(), // value doesn't matter
+		};
+
+		let calculated = super::round_to_currency(loan.calculate_payment_amount());
+		assert!(
+			(expected - calculated).abs() <= 0.05,
+			"Expected {} to be within 5 cents of {}",
+			calculated,
+			expected
+		);
+	}
 }
