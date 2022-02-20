@@ -335,4 +335,20 @@ mod tests {
 	fn approx_equal(a: f64, b: f64, decimal_places: u8) -> bool {
 		super::approx_equal(a, b, decimal_places)
 	}
+
+	#[test_case(4.001, 0 => 4.0)]
+	#[test_case(4.001, 1 => 4.0)]
+	#[test_case(4.001, 2 => 4.0)]
+	#[test_case(4.001, 3 => 4.001)]
+	#[test_case(4.001, 4 => 4.001)]
+	fn round_to_decimals(a: f64, places: i32) -> f64 {
+		super::round_to_decimals(a, places)
+	}
+
+	#[test_case(4.001 => 4.0)]
+	#[test_case(4.011 => 4.01)]
+	#[test_case(4.099 => 4.10)]
+	fn round_to_currency(a: f64) -> f64 {
+		super::round_to_currency(a)
+	}
 }
